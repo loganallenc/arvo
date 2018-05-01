@@ -449,6 +449,7 @@
         let/@ud                                         ::  top id
         hit/(map @ud tako)                              ::  changes by id
         lab/(map @tas @ud)                              ::  labels
+        bal/(map @ud @tas)                              ::  label reverse lookup
     ==                                                  ::
   ++  germ                                              ::  merge style
     $?  $init                                           ::  new desk

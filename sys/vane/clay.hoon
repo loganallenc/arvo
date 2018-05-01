@@ -83,6 +83,7 @@
       let/aeon                                          ::  top id
       hit/(map aeon tako)                               ::  versions by id
       lab/(map @tas aeon)                               ::  labels
+      bal/(jug aeon @tas)                               ::  label reverse lookup
   ==                                                    ::
 ::
 ::  Commit state.
@@ -2174,7 +2175,11 @@
            ::  +>.$(ank (map-to-ankh q.yak))
         $|
            ?<  (~(has by lab.dom) p.lem)
-           [~ ..ze(lab.dom (~(put by lab.dom) p.lem let.dom))]
+           :-  ~
+           %_  ..ze
+             lab.dom  (~(put by lab.dom) p.lem let.dom)
+             bal.dom  (~(put ju bal.dom) let.dom p.lem)
+           ==
       ==
     ::
     ::  Create a commit out of a list of changes against the current state.
@@ -2479,6 +2484,7 @@
             let=yon
             hit=(molt (skim ~(tap by hit.dom) |=({p/@ud *} (lte p yon))))
             lab=(molt (skim ~(tap by lab.dom) |=({* p/@ud} (lte p yon))))
+            bal=(molt (skim ~(tap by bal.dom) |=({p/@ud *} (lte p yon))))
         ==
       ?:  (gth yon let.dom)
         ~
@@ -2826,7 +2832,13 @@
         ?~  rot
           (error:he %bad-fetch-ali ~)
         =+  ^=  dum
-            %-  (hard {ank/* let/@ud hit/(map @ud tako) lab/(map @tas @ud)})
+            %-  %-  hard
+                $:  ank/*
+                    let/@ud
+                    hit/(map @ud tako)
+                    lab/(map @tas @ud)
+                    bal/(jug @ud @tas)
+                ==
             q.q.r.u.rot
         ?:  =(0 let.dum)
           (error:he %no-ali-desk ~)
@@ -3843,8 +3855,14 @@
         ==
       ++  wove-0  (cork wove |=(a/wove a(q (rove-0 q.a))))
       ++  cult-0  (jug wove-0 duct)
-      ++  dojo-0  (cork dojo |=(a/dojo a(qyx *cult-0)))
-      ++  rede-0  (cork rede |=(a/rede a(qyx *cult-0)))
+      ++  dome-0
+        $:  ank/ankh
+            let/aeon
+            hit/(map aeon tako)
+            lab/(map @tas aeon)
+        ==
+      ++  dojo-0  (cork dojo |=(a/dojo a(qyx *cult-0, dom *dome-0)))
+      ++  rede-0  (cork rede |=(a/rede a(qyx *cult-0, dom *dome-0)))
       ++  room-0  (cork room |=(a/room a(dos (~(run by dos.a) dojo-0))))
       ++  rung-0  (cork rung |=(a/rung a(rus (~(run by rus.a) rede-0))))
       ++  raft-0
@@ -3887,6 +3905,14 @@
       |=  {p/wove-0 q/(set duct)}
       [(wov p) q]
     ::
+    ++  dom
+      |=  dome-0
+      ^-  dome
+      =-  [ank let hit lab -]
+      %+  roll  ~(tap by lab)
+      |=  {{l/@tas a/aeon} r/(jug aeon @tas)}
+      (~(put ju r) a l)
+    ::
     ++  rom
       |=  room-0
       ^-  room
@@ -3894,14 +3920,14 @@
       %-  ~(run by dos)
       |=  d/dojo-0
       ^-  dojo
-      d(qyx (cul qyx.d))
+      d(qyx (cul qyx.d), dom (dom dom.d))
     ::
     ++  run
       |=  a/rung-0
       =-  a(rus (~(run by rus.a) -))
       |=  r/rede-0
       ^-  rede
-      r(qyx (cul qyx.r))
+      r(qyx (cul qyx.r), dom (dom dom.r))
     --
   ==
 ::
