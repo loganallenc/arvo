@@ -44,10 +44,9 @@
 ::  Type of request.
 ::
 ::  %d produces a set of desks, %p gets file permissions, %u checks for
-::  existence, %v produces a ++dome of all desk data, %w with a time or label
-::  case gets the aeon at that case, %w with a number case is not recommended,
-::  %x gets file contents, %y gets a directory listing, and %z gets a recursive
-::  hash of the file contents and children.
+::  existence, %v produces a ++dome of all desk data, %w gets all variants
+::  for the given case, %x gets file contents, %y gets a directory listing,
+::  and %z gets a recursive hash of the file contents and children.
 ::
 :: ++  care  ?($d $p $u $v $w $x $y $z)
 ::
@@ -2490,6 +2489,21 @@
         ~
       ``[%dome -:!>(*dome) dom]
     ::
+    ::  Gets all cases refering to the same revision as the given case.
+    ::
+    ::  For the %da case, we give just the canonical timestamp of the revision.
+    ::
+    ++  read-w
+      |=  cas/case
+      ^-  (unit (unit (each cage lobe)))
+      =+  aey=(case-to-aeon)
+      ?~  aey  ~
+      =-  [~ ~ %& %noun !>(-)]
+      ^-  cass
+      :+  u.aey
+        t:(aeon-to-yaki aey)
+      (~(get ju bal.dom) aey)
+    ::
     ::  Gets the data at a node.
     ::
     ::  If it's in our ankh (current state cache), we can just produce the
@@ -2609,7 +2623,7 @@
       ?.  |(?=($~ for) (may-read u.for p.mun yon r.mun))
         ~
       ?:  &(?=($w p.mun) !?=($ud -.q.mun))              ::  NB only her speed
-        ?^(r.mun [~ ~] [~ ~ %& %aeon !>(yon)])
+        (read-w q.mun)
       ?:  ?=($d p.mun)
         =+  rom=(~(get by fat.ruf) her)
         ?~  rom
