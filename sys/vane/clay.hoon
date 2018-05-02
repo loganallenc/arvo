@@ -2460,13 +2460,13 @@
     ++  read-w
       |=  cas/case
       ^-  (unit (unit (each cage lobe)))
-      =+  aey=(case-to-aeon)
+      =+  aey=(case-to-aeon cas)
       ?~  aey  ~
       =-  [~ ~ %& %noun !>(-)]
       ^-  cass
       :+  u.aey
-        t:(aeon-to-yaki aey)
-      (~(get ju bal.dom) aey)
+        t:(aeon-to-yaki u.aey)
+      (~(get ju bal.dom) u.aey)
     ::
     ::  Gets the data at a node.
     ::
