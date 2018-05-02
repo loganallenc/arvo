@@ -412,7 +412,7 @@
           leaf+"bad %writ response"
         (render "on sync" sud her syd)
       ~
-    =.  let  ?.  ?=($w p.p.u.rot)  let  ((hard @ud) q.q.r.u.rot)
+    =.  let  ?.  ?=($w p.p.u.rot)  let  ud:((hard cass) q.q.r.u.rot)
     %-  blab  ^-  (list move)  :_  ~
     :*  ost  %merg
         [%kiln %sync syd (scot %p her) sud ?:(reset /reset /)]
