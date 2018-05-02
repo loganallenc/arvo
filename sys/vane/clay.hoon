@@ -1583,7 +1583,7 @@
         :+  ~
           p.r.u.rut
         ?+  p.r.u.rut  ~|  %strange-w-over-nextwork  !!
-          $aeon  !>(((hard aeon) q.r.u.rut))
+          $cass  !>(((hard cass) q.r.u.rut))
           $null  [[%atom %n ~] ~]
           $nako  !>(~|([%harding [&1 &2 &3]:q.r.u.rut] ((hard nako) q.r.u.rut)))
         ==
@@ -2462,7 +2462,7 @@
       ^-  (unit (unit (each cage lobe)))
       =+  aey=(case-to-aeon cas)
       ?~  aey  ~
-      =-  [~ ~ %& %noun !>(-)]
+      =-  [~ ~ %& %cass !>(-)]
       ^-  cass
       :+  u.aey
         t:(aeon-to-yaki u.aey)
