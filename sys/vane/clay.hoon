@@ -2173,10 +2173,7 @@
            ::  +>.$(ank (map-to-ankh q.yak))
         $|
            ?<  (~(has by lab.dom) p.lem)
-           :-  ~
-           %_  ..ze
-             lab.dom  (~(put by lab.dom) p.lem let.dom)
-           ==
+           [~ ..ze(lab.dom (~(put by lab.dom) p.lem let.dom))]
       ==
     ::
     ::  Create a commit out of a list of changes against the current state.
@@ -2767,12 +2764,7 @@
         ?~  rot
           (error:he %bad-fetch-ali ~)
         =+  ^=  dum
-            %-  %-  hard
-                $:  ank/*
-                    let/@ud
-                    hit/(map @ud tako)
-                    lab/(map @tas @ud)
-                ==
+            %-  (hard {ank/* let/@ud hit/(map @ud tako) lab/(map @tas @ud)})
             q.q.r.u.rot
         ?:  =(0 let.dum)
           (error:he %no-ali-desk ~)
