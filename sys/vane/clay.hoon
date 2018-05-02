@@ -2462,6 +2462,7 @@
       ^-  (unit (unit (each cage lobe)))
       =+  aey=(case-to-aeon cas)
       ?~  aey  ~
+      ?:  =(0 u.aey)  [~ ~]
       =-  [~ ~ %& %cass !>(-)]
       ^-  cass
       :+  u.aey
