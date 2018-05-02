@@ -2464,10 +2464,9 @@
       ?~  aey  ~
       =-  [~ ~ %& %cass !>(-)]
       ^-  cass
-      :+  u.aey
-        ?:  =(0 u.aey)  `@da`0
-        t:(aeon-to-yaki u.aey)
-      (~(get ju bal.dom) u.aey)
+      :-  u.aey
+      ?:  =(0 u.aey)  `@da`0
+      t:(aeon-to-yaki u.aey)
     ::
     ::  Gets the data at a node.
     ::
