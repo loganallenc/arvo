@@ -2772,7 +2772,6 @@
                     let/@ud
                     hit/(map @ud tako)
                     lab/(map @tas @ud)
-                    bal/(jug @ud @tas)
                 ==
             q.q.r.u.rot
         ?:  =(0 let.dum)
