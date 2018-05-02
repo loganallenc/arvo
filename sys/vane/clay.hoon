@@ -2462,10 +2462,10 @@
       ^-  (unit (unit (each cage lobe)))
       =+  aey=(case-to-aeon cas)
       ?~  aey  ~
-      ?:  =(0 u.aey)  [~ ~]
       =-  [~ ~ %& %cass !>(-)]
       ^-  cass
       :+  u.aey
+        ?:  =(0 u.aey)  `@da`0
         t:(aeon-to-yaki u.aey)
       (~(get ju bal.dom) u.aey)
     ::
