@@ -58,6 +58,7 @@
   test-cache-reclamation-live-promote
   test-five-oh-cache-reclamation
   test-reef
+  test-path
   test-plan-direct-hoon
 ==
 ++  test-tear
@@ -3066,6 +3067,43 @@
       ^=  moves
         :~  :*  duct=~[/reef]  %give  %made  ~1234.5.6  %complete
                 %success  %pin  ~1234.5.6  %success  %reef  test-pit
+    ==  ==  ==
+  ::
+  ;:  weld
+    results1
+    (expect-ford-empty ford ~nul)
+  ==
+::
+++  test-path
+  ~&  %test-path
+  ::
+  =/  ford  *ford-gate
+  ::
+  =/  scry-results=(map [term beam] (unit cage))
+    %-  my  :~
+      :-  [%cx [[~nul %desk %da ~1234.5.6] /hoon/bar/foo/lib]]
+      `[%hoon !>(*hoon)]
+    ::
+      :-  [%cx [[~nul %desk %da ~1234.5.6] /hoon/foo-bar/lib]]
+      ~
+    ==
+  ::
+  =^  results1  ford
+    %-  test-ford-call  :*
+      ford
+      now=~1234.5.6
+      scry=(scry-with-results-and-failures scry-results)
+      ::
+      ^=  call-args
+        :*  duct=~[/path]  type=~  %make  ~nul
+            %pin  ~1234.5.6
+            [%path disc=[~nul %desk] prefix='lib' raw-path='foo-bar']
+        ==
+      ::
+      ^=  moves
+        :~  :*  duct=~[/path]  %give  %made  ~1234.5.6  %complete
+                %success  %pin  ~1234.5.6
+                %success  %path  [[~nul %desk] /hoon/bar/foo/lib]
     ==  ==  ==
   ::
   ;:  weld
