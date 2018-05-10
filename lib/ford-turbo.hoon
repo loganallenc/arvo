@@ -324,15 +324,10 @@
         ::    original path. Produces an error if multiple files match,
         ::    e.g. a/b/c and a/b-c, or a/b/c and a-b/c.
         ::
-        ::    TODO verify current implementation
-        ::
         $:  %path
-            ::  disc the +disc within which to resolve :file-path
+            ::  rail: the +rail whose `-`s will be replaced with `/`s
             ::
-            location=disc
-            ::  file-path: the path to resolve
-            ::
-            file-path=@tas
+            =rail
         ==
         ::  %plan: build a hoon program from a preprocessed source file
         ::
@@ -977,6 +972,40 @@
 --
 =,  format
 |%
+::  +tear: split a +term into segments delimited by `-`
+::
+++  tear
+  |=  a=term
+  ^-  (list term)
+  ::  sym-no-heps: a parser for terms with no heps and a leading letter
+  ::
+  =/  sym-no-heps  (cook crip ;~(plug low (star ;~(pose low nud))))
+  ::
+  (fall (rush a (most hep sym-no-heps)) /[a])
+::  +segments: TODO rename
+::
+++  segments
+  |=  path-part=@tas
+  ^-  (list path)
+  ::
+  =/  join  |=([a=@tas b=@tas] (crip "{(trip a)}-{(trip b)}"))
+  ::
+  =/  torn=(list @tas)  (tear path-part)
+  ::
+  |-  ^-  (list (list @tas))
+  ::
+  ?<  ?=(~ torn)
+  ::
+  ?:  ?=([@ ~] torn)
+    ~[torn]
+  ::
+  %-  zing
+  %+  turn  $(torn t.torn)
+  |=  s=(list @tas)
+  ^-  (list (list @tas))
+  ::
+  ?>  ?=(^ s)
+  ~[[i.torn s] [(join i.torn i.s) t.s]]
 ::  +build-to-tape: convert :build to a printable format
 ::
 ++  build-to-tape

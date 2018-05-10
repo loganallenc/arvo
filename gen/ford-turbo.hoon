@@ -12,6 +12,7 @@
 =-  ((slog -) ~)
 ^-  tang
 ;:  weld
+  test-tear
   test-is-schematic-live
   test-date-from-schematic
   test-unify-jugs
@@ -59,6 +60,23 @@
   test-reef
   test-plan-direct-hoon
 ==
+++  test-tear
+  ~&  %test-tear
+  ::
+  ;:  welp
+    %-  expect-eq  !>
+    :-  ~['a' 'bc' 'de']
+    (tear:ford-gate 'a-bc-de')
+  ::
+    %-  expect-eq  !>
+    :-  ~['abc']
+    (tear:ford-gate 'abc')
+  ::
+    %-  expect-eq  !>
+    :-  ~['ab/c']
+    (tear:ford-gate 'ab/c')
+  ==
+::
 ++  test-is-schematic-live
   ~&  %test-is-schematic-live
   ::
