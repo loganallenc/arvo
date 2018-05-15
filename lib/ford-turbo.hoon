@@ -3104,25 +3104,13 @@
         [build [%blocks blocks ~] accessed-builds]
       ::
       ?.  ?=([~ %success %scry *] hoon-scry-result)
-        ?>  ?=([~ %error *] hoon-scry-result)
-        =/  message=tang
-          [[%leaf "%reef failed: "] message.u.hoon-scry-result]
-        ::
-        [build [%build-result %error message] accessed-builds]
+        (wrap-error hoon-scry-result)
       ::
       ?.  ?=([~ %success %scry *] arvo-scry-result)
-        ?>  ?=([~ %error *] arvo-scry-result)
-        =/  message=tang
-          [[%leaf "%reef failed: "] message.u.arvo-scry-result]
-        ::
-        [build [%build-result %error message] accessed-builds]
+        (wrap-error arvo-scry-result)
       ::
       ?.  ?=([~ %success %scry *] zuse-scry-result)
-        ?>  ?=([~ %error *] zuse-scry-result)
-        =/  message=tang
-          [[%leaf "%reef failed: "] message.u.zuse-scry-result]
-        ::
-        [build [%build-result %error message] accessed-builds]
+        (wrap-error zuse-scry-result)
       ::  omit case from path to prevent cache misses
       ::
       =/  hoon-path=path
@@ -3150,11 +3138,7 @@
         [build [%blocks [zuse-build]~ ~] accessed-builds]
       ::
       ?.  ?=([~ %success %ride *] zuse-build-result)
-        ?>  ?=([~ %error *] zuse-build-result)
-        =/  message=tang
-          [[%leaf "%reef failed: "] message.u.zuse-build-result]
-        ::
-        [build [%build-result %error message] accessed-builds]
+        (wrap-error zuse-build-result)
       ::
       :+  build
         [%build-result %success %reef vase.u.zuse-build-result]
@@ -3175,13 +3159,8 @@
       ?~  slim-result
         [build [%blocks [date.build slim-schematic]~ ~] accessed-builds]
       ::
-      ?:  ?=(%error -.u.slim-result)
-        :*  build
-            [%build-result %error [%leaf "%ride: "] message.u.slim-result]
-            accessed-builds
-        ==
-      ::
-      ?>  ?=([%success %slim *] u.slim-result)
+      ?.  ?=([~ %success %slim *] slim-result)
+        (wrap-error slim-result)
       ::
       =/  val
         (mock [q.q.subject-cage nock.u.slim-result] intercepted-scry)
@@ -3305,6 +3284,17 @@
     ::  |utilities:make: helper arms
     ::
     ::+|  utilities
+    ::  +wrap-error: wrap an error message around a failed sub-build
+    ::
+    ++  wrap-error
+      |=  result=(unit build-result)
+      ^-  build-receipt
+      ::
+      ?>  ?=([~ %error *] result)
+      =/  message=tang
+        [[%leaf "%{(trip -.schematic.build)} failed: "] message.u.result]
+      ::
+      [build [%build-result %error message]] accessed-builds]
     ::
     ++  depend-on
       |=  kid=^build
