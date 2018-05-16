@@ -3002,6 +3002,104 @@
       ::  TODO: support source-path
       ::  TODO: support indirect hoons
       ::
+      =|  blocks=(list ^build)
+      ::
+      =/  path-builds=(list [prefix=?(%lib %sur) raw-path=term ^build])
+        %+  turn
+          %+  weld
+            (turn structures.scaffold |=(cable [%sur +<]))
+          (turn libraries.scaffold |=(cable [%lib +<]))
+        ::
+        |=  [prefix=?(%sur %lib) =cable]
+        ^-  [?(%sur %lib) term ^build]
+        ::  TODO support :expose-internal-symbols
+        ::
+        ?<  expose-internal-symbols.cable
+        ::  TODO support :remote-location
+        ::
+        ?>  ?=(~ remote-location.cable)
+        ::
+        :+  prefix  file-path.cable
+        [date.build [%path disc.source-path prefix file-path.cable]]
+      ::
+      ?^  blocks
+        [build [%blocks blocks ~] accessed-builds]
+      ::
+      =|  resolved-rails=(map [prefix=?(%lib %sur) raw-path=term] rail)
+      ::
+        |-  ^+  !!
+        ::
+        =^  rail-result  accessed-builds  (depend-on rail-build)
+        ?~  rail-result
+          =.  blocks  [rail-build blocks]
+          $(rail-builds t.rail-builds)
+        ::
+        ?.  ?=([~ %success %path *] rail-result)
+          (wrap-error rail-result)
+        ::
+        =.  resolved-rails  [rail.u.rail-result resolved-rails]
+        ::
+        $(rail-builds t.rail-builds)
+      ::
+      ?^  blocks
+        [build [%blocks blocks ~] accessed-builds]
+      ::
+      =/  core-builds=(list [prefix=?(%lib %sur) raw-path=term build=^build)
+        %+  turn  resolved-rails
+        |=  [prefix=?(%lib %sur) raw-path=term =rail]
+        ^-  [prefix=?(%lib %sur) raw-path=term ^build]
+        ::
+        [prefix raw-path [date.build [%core rail]]]
+      ::
+      =|  cores=(list [prefix=?(%lib %sur) raw-path=term =vase])
+      ::
+        |-  ^+  !!
+        ::
+        =^  core-result  accessed-builds  (depend-on build.core-build)
+        ?~  core-result
+          =.  blocks  [build.core-build blocks]
+          $(core-builds t.core-builds)
+        ::
+        ?.  ?=([~ %success %core *] core-result)
+          (wrap-error core-result)
+        ::
+        =.  cores  [prefix raw-path vase.u.core-result]
+        ::
+        $(core-builds t.core-builds)
+      ::
+      ?^  blocks
+        [build [%blocks blocks ~] accessed-builds]
+      ::
+      =/  reef-build=^build  [date.build [%reef disc.source-path]]
+      ::
+      =^  reef-result  accessed-builds  (depend-on reef-build)
+      ?~  reef-result
+        [build [%blocks [reef-build]~ ~] accessed-builds]
+      ::
+      ?.  ?=([~ %success %reef *] reef-result)
+        (wrap-error reef-result)
+      ::
+      =/  subject=vase  vase.u.reef-result
+      ::  TODO better sort order
+      ::
+      =/  sorted-cores
+        %+  sort  cores
+        |=  [a=[?(%lib %sur) *] b=[?(%lib %sur) *]]
+        ^-  ?
+        ?=(%sur -.a)
+      ::  link structures and libraries into a subject for compilation
+      ::
+      =.  subject
+        |-  ^+  subject
+        ?~  sorted-cores  subject
+        ::
+        %+  slop  :_  subject
+        ::  use the library name as a face to prevent namespace leakage
+        ::  TODO support *lib-name
+        ::
+        =,  i.sorted-cores
+        [[%face raw-path p.vase] q.vase]
+      ::
       =/  hoon-stack=(list hoon)
         %+  turn  sources.scaffold
         |=  =brick  ?>(?=(%direct -.brick) source.brick)
@@ -3012,7 +3110,7 @@
       ::  compile :combined-hoon against the kernel subject
       ::
       =/  compile=^build
-        [date.build [%ride combined-hoon [%reef disc.source-path]]]
+        [date.build [%ride combined-hoon [$% %noun subject]]]
       ::
       =^  compiled  accessed-builds  (depend-on compile)
       ::  compilation blocked; produce block on sub-build
