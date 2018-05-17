@@ -12,78 +12,79 @@
 =-  ((slog -) ~)
 ^-  tang
 ;:  weld
-  test-tear
-  test-is-schematic-live
-  test-date-from-schematic
-  test-unify-jugs
-  test-resource-wire-encoding
-  test-parse-scaffold-direct
-  test-parse-scaffold-indirect
-  test-parse-scaffold-sur-lib
-  test-parse-scaffold-zuse-version
-  test-parse-scaffold-crane-fssg
-  test-parse-scaffold-crane-fsbc
-  test-parse-scaffold-crane-fsbr
-  test-parse-scaffold-crane-fsts
-  test-parse-scaffold-crane-fsdt
-  test-parse-scaffold-crane-fscm
-  test-parse-scaffold-crane-fscn
-  test-parse-scaffold-crane-fspm
-  test-parse-scaffold-crane-fscb
-  test-parse-scaffold-crane-fssm
-  test-parse-scaffold-crane-fscl
-  test-parse-scaffold-crane-fskt
-  test-parse-scaffold-crane-fszp
-  test-parse-scaffold-crane-fszy
-  test-literal
-  test-autocons-same
-  test-autocons-different
-  test-scry-clay-succeed
-  test-scry-clay-fail
-  test-scry-clay-block
-  test-scry-clay-live
-  test-scry-clay-live-again
-  test-scry-clay-same-path
-  test-pinned-in-past
-  test-pinned-in-future
-  test-pinned-in-pin
-  test-pinned-in-live
-  test-live-build-that-blocks
-  test-live-and-once
-  test-live-two-deep
-  test-live-three-deep
-  test-live-triangle
-  test-live-and-pinned-triangle
-  test-call
-  test-call-scry-succeed
-  test-call-scry-fail
-  test-call-scry-block
-  test-call-scry-varies
-  test-dude
-  test-dude-error
-  test-hood
-  test-slim
-  test-slit
-  test-slit-error
-  test-ride
-  test-ride-scry-succeed
-  test-ride-scry-fail
-  test-ride-scry-block
-  test-ride-scry-promote
-  test-five-oh-fora
-  test-alts
-  test-alts-and-live
-  test-double-alts
-  test-cache-reclamation-trivial
-  test-cache-reclamation-live-rebuild
-  test-cache-reclamation-live-promote
-  test-five-oh-cache-reclamation
-::  test-reef  ::  very slow
-  test-reef-short-circuit
-  test-path
-  test-plan-direct-hoon
-  test-core
-  test-core-linker
+::    test-tear
+::    test-is-schematic-live
+::    test-date-from-schematic
+::    test-unify-jugs
+::    test-resource-wire-encoding
+::    test-parse-scaffold-direct
+::    test-parse-scaffold-indirect
+::    test-parse-scaffold-sur-lib
+::    test-parse-scaffold-zuse-version
+::    test-parse-scaffold-crane-fssg
+::    test-parse-scaffold-crane-fsbc
+::    test-parse-scaffold-crane-fsbr
+::    test-parse-scaffold-crane-fsts
+::    test-parse-scaffold-crane-fsdt
+::    test-parse-scaffold-crane-fscm
+::    test-parse-scaffold-crane-fscn
+::    test-parse-scaffold-crane-fspm
+::    test-parse-scaffold-crane-fscb
+::    test-parse-scaffold-crane-fssm
+::    test-parse-scaffold-crane-fscl
+::    test-parse-scaffold-crane-fskt
+::    test-parse-scaffold-crane-fszp
+::    test-parse-scaffold-crane-fszy
+::    test-literal
+::    test-autocons-same
+::    test-autocons-different
+::    test-scry-clay-succeed
+::    test-scry-clay-fail
+::    test-scry-clay-block
+::    test-scry-clay-live
+::    test-scry-clay-live-again
+::    test-scry-clay-same-path
+::    test-pinned-in-past
+::    test-pinned-in-future
+::    test-pinned-in-pin
+::    test-pinned-in-live
+::    test-live-build-that-blocks
+::    test-live-and-once
+::    test-live-two-deep
+::    test-live-three-deep
+::    test-live-triangle
+::    test-live-and-pinned-triangle
+::    test-call
+::    test-call-scry-succeed
+::    test-call-scry-fail
+::    test-call-scry-block
+::    test-call-scry-varies
+::    test-dude
+::    test-dude-error
+::    test-hood
+::    test-slim
+::    test-slit
+::    test-slit-error
+::    test-ride
+::    test-ride-scry-succeed
+::    test-ride-scry-fail
+::    test-ride-scry-block
+::    test-ride-scry-promote
+::    test-five-oh-fora
+::    test-alts
+::    test-alts-and-live
+::    test-double-alts
+::    test-cache-reclamation-trivial
+::    test-cache-reclamation-live-rebuild
+::    test-cache-reclamation-live-promote
+::    test-five-oh-cache-reclamation
+::  ::  test-reef  ::  very slow
+::    test-reef-short-circuit
+::    test-path
+::    test-plan-direct-hoon
+::    test-core
+::    test-core-linker
+  test-core-fsts-fssg
 ==
 ++  test-tear
   ~&  %test-tear
@@ -4051,6 +4052,68 @@
         %-  expect-eq  !>
         :-  &
         (~(nest ut p.vase) | -:!>(["onetwo" 3]))
+    ==
+  ::
+  ;:  weld
+    results1
+    (expect-ford-empty ford ~nul)
+  ==
+::
+++  test-core-fsts-fssg
+  ~&  %test-core-fsts-fssg
+  ::
+  =/  ford  *ford-gate
+  ::
+  =/  hoon-src-type=type  [%atom %$ ~]
+  =/  scry-results=(map [term beam] cage)
+    %-  my  :~
+      :-  [%cx [[~nul %home %da ~1234.5.6] /hoon/program/gen]]
+      :-  %hoon
+      :-  hoon-src-type
+      '''
+      /=  one  /~  `@u`1
+      /=  two  /~  `@u`2
+      (add one two)
+      '''
+    ==
+  ::
+  =^  results1  ford
+    %-  test-ford-call-with-comparator  :*
+      ford
+      now=~1234.5.6
+      scry=(scry-with-results scry-results)
+      ::
+      ^=  call-args
+        :*  duct=~[/path]  type=~  %make  ~nul
+            %pin  ~1234.5.6
+            [%core source-path=`rail:ford-gate`[[~nul %home] /hoon/program/gen]]
+        ==
+      ::
+      ^=  comparator
+        |=  moves=(list move:ford-gate)
+        ::
+        ?>  =(1 (lent moves))
+        ?>  ?=(^ moves)
+        ~&  %one
+        ?>  ?=([* %give %made @da %complete %success %pin *] i.moves)
+        =/  result  result.p.card.i.moves
+        =/  pin-result  build-result.result
+        ~&  build-result.pin-result
+        ?>  ?=([%success %core *] build-result.pin-result)
+        ~&  %two
+        ::
+        =/  =vase  vase.build-result.pin-result
+        ::
+        ~&  %three
+        %+  weld
+          %-  expect-eq  !>
+          :-  3
+          q.vase
+        ::
+        ~&  %four
+        %-  expect-eq  !>
+        :-  &
+        (~(nest ut p.vase) | -:!>([3]))
     ==
   ::
   ;:  weld
