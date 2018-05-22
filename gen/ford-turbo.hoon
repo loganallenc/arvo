@@ -4984,6 +4984,84 @@
     (expect-ford-empty ford ~nul)
   ==
 ::
+++  test-cast
+  :-  `tank`leaf+"test-cast"
+  ::
+  =/  ford  *ford-gate
+  ::
+  =/  foo-mark-src=@ta
+    '''
+    |_  cell=^
+    ++  grab
+      |%
+      ++  bar  ^
+      --
+    --
+    '''
+  ::
+  =/  bar-mark-src=@ta
+    '''
+    |_  sample=[@ @]
+    ++  grab
+      |%
+      ++  noun  ^
+      --
+    --
+    '''
+  ::
+  =/  scry-results=(map [term beam] cage)
+    %-  my  :~
+      :-  [%cx [[~nul %home %da ~1234.5.6] /hoon/foo/mar]]
+      [%hoon !>(foo-mark-src)]
+    ::
+      :-  [%cx [[~nul %home %da ~1234.5.6] /hoon/bar/mar]]
+      [%hoon !>(bar-mark-src)]
+    ==
+  ::
+  =^  results1  ford
+    %-  test-ford-call-with-comparator  :*
+      ford
+      now=~1234.5.6
+      scry=(scry-with-results scry-results)
+      ::
+      ^=  call-args
+        :*  duct=~[/path]  type=~  %make  ~nul
+            %pin  ~1234.5.6
+            [%cast [~nul %home] %foo [%vale [~nul %home] %bar [12 13]]]
+        ==
+      ::
+      ^=  comparator
+        |=  moves=(list move:ford-gate)
+        ::
+        ?>  =(1 (lent moves))
+        ?>  ?=(^ moves)
+        ?>  ?=([* %give %made @da %complete %success %pin *] i.moves)
+        =/  result  result.p.card.i.moves
+        =/  pin-result  build-result.result
+        ?>  ?=([%success %vale *] build-result.pin-result)
+        ::
+        =/  mark=term  p.cage.build-result.pin-result
+        =/  =vase      q.cage.build-result.pin-result
+        ::
+        ;:  welp
+          %-  expect-eq  !>
+          :-  %foo
+          mark
+        ::
+          %-  expect-eq  !>
+          :-  [12 13]
+          q.vase
+        ::
+          %-  expect-eq  !>
+          :-  &
+          (~(nest ut p.vase) | -:!>(*^))
+    ==  ==
+  ::
+  ;:  weld
+    results1
+    (expect-ford-empty ford ~nul)
+  ==
+::
 ::
 ::  |utilities: helper arms
 ::

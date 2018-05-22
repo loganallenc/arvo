@@ -2692,7 +2692,7 @@
             %bake  !!
             %bunt  (make-bunt disc mark)
             %call  (make-call gate sample)
-            %cast  !!
+            %cast  (make-cast disc mark input)
             %core  (make-core source-path)
             %diff  !!
             %dude  (make-dude error attempt)
@@ -2868,6 +2868,32 @@
           %2
         (return-error [[%leaf "ford: %call failed:"] p.val])
       ==
+    ::
+    ++  make-cast
+      |=  [=disc mark=term input=schematic]
+      ^-  build-receipt
+      ::
+      =/  path-build=^build  [date.build [%path disc %mar mark]]
+      ::
+      =^  path-result  accessed-builds  (depend-on path-build)
+      ?~  path-result
+        [build [%blocks [path-build]~ ~] accessed-builds]
+      ::
+      ?.  ?=([~ %success %path *] path-result)
+        (wrap-error path-result)
+      ::
+      =/  core-build=^build  [date.build [%core rail.u.path-result]]
+      ::
+      =^  core-result  accessed-builds  (depend-on core-build)
+      ?~  core-result
+        [build [%blocks [core-build]~ ~] accessed-builds]
+      ::
+      ?.  ?=([~ %success %core *] core-result)
+        (wrap-error core-result)
+      ::
+      =/  destination-mark=vase  vase.u.core-result
+      ::
+
     ::
     ++  make-core
       |=  source-path=rail
