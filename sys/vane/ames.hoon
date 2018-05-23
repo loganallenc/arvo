@@ -998,6 +998,7 @@
     ++  gnaw                                            ::    gnaw:am
       |=  [kay=cape ryn=lane pac=rock]                  ::  process packet
       ^-  [p=(list boon) q=fort]
+      ~&  gnaw1+[cape=kay lane=ryn]
       ?.  =(protocol-version (end 0 3 pac))  [~ fox]
       =+  kec=(bite pac)
       ?:  (goop p.p.kec)  [~ fox]
@@ -1005,7 +1006,7 @@
         [~ fox]
       =<  zork
       =<  zank
-      ~&  gnaw+[cape=kay lane=ryn cake=kec]
+      ~&  gnaw2+[cape=kay lane=ryn cake=kec]
       ::  ~&  [%hear p.p.kec ryn `@p`(mug (shaf %flap pac))]
       %-  ~(chew la:(ho:(um q.p.kec) p.p.kec) kay ryn %none (shaf %flap pac))
       [q.kec r.kec]
