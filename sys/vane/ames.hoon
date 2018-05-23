@@ -527,6 +527,7 @@
                   pac=rock
               ==
           ^-  (list boon)
+          ~&  wist1+[her=her waz=waz lane=ryn]
           ?:  =(our her)  [[%ouzo *lane pac] ~]
           ?~  waz  ~
           =+  dyr=?:(=(her i.waz) dur (gur i.waz))
@@ -537,7 +538,7 @@
           :_  ?:  ?=(%ix -.u.lun.wod.dyr)
                 $(waz t.waz)
               ~
-          ~&  wist+[her=her waz=waz lane=ryn]
+          ~&  wist2+[her=her waz=waz lane=ryn]
           :+  %ouzo  u.lun.wod.dyr
           ?:  &(=(i.waz her) =(~ ryn))  pac
           =+  mal=(jam `meal`[%fore her ryn pac])
@@ -1065,6 +1066,7 @@
     ++  wise                                            ::    wise:am
       |=  [soq=sock hen=duct cha=path val=*]            ::  send a statement
       ^-  [p=(list boon) q=fort]
+      ~&  wise+[sock=soq duct=hen path=cha]
       zork:zank:(wool:(ho:(um p.soq) q.soq) hen cha val)
     ::
     ++  um                                              ::  per server
