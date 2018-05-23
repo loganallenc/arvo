@@ -99,6 +99,7 @@
   test-volt
   test-vale
   test-vale-error
+  test-cast
 ==
 ++  test-tear
   :-  `tank`leaf+"test-tear"
@@ -5004,7 +5005,7 @@
     |_  sample=[@ @]
     ++  grab
       |%
-      ++  noun  ^
+      +=  noun  [@ @]
       --
     --
     '''
@@ -5038,7 +5039,7 @@
         ?>  ?=([* %give %made @da %complete %success %pin *] i.moves)
         =/  result  result.p.card.i.moves
         =/  pin-result  build-result.result
-        ?>  ?=([%success %vale *] build-result.pin-result)
+        ?>  ?=([%success %cast *] build-result.pin-result)
         ::
         =/  mark=term  p.cage.build-result.pin-result
         =/  =vase      q.cage.build-result.pin-result
