@@ -528,17 +528,21 @@
               ==
           ^-  (list boon)
           ~&  wist1+[her=her waz=waz lane=ryn]
+          ~&  dur1/dur
           ?:  =(our her)  [[%ouzo *lane pac] ~]
           ?~  waz  ~
           =+  dyr=?:(=(her i.waz) dur (gur i.waz))
+          ~&  dyr1/dyr
           ?.  ?&  !=(our i.waz)
                   ?=(^ lun.wod.dyr)
               ==
             $(waz t.waz)
+          ~&  dyr2/dyr
           :_  ?:  ?=(%ix -.u.lun.wod.dyr)
                 $(waz t.waz)
               ~
           ~&  wist2+[her=her waz=waz lane=ryn]
+          ~&  dyr3/dyr
           :+  %ouzo  u.lun.wod.dyr
           ?:  &(=(i.waz her) =(~ ryn))  pac
           =+  mal=(jam `meal`[%fore her ryn pac])
