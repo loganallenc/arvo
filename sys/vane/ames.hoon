@@ -1270,7 +1270,7 @@
             |=  [cha=path num=@ud dut=(unit)]           ::  interpret message
             ^+  +>
             =+  rum=(fall (~(get by raz.bah) cha) *race)
-            ::  ~&  [%rx kay cha num [dod.rum did.rum] ?=(~ dut)]
+             ~&  [%rx kay cha num [dod.rum did.rum] ?=(~ dut)]
             =*  bad  (~(has in bad.fox) her)
             =.  kay  ?.((~(has in bad.fox) her) kay ~&(%blocked %dead))
             %=    +>.$
@@ -1425,7 +1425,7 @@
               =+  rol=(~(get by ryl.bah) cha)
               ?~(rol *rill u.rol)
           =+  sex=sed.rol
-          ::  ~&  [%tx [our her] cha sex]
+           ~&  [%tx [our her] cha sex]
           =.  ryl.bah
               %+  ~(put by ryl.bah)  cha
               rol(sed +(sed.rol), san (~(put by san.rol) sex hen))
