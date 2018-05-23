@@ -2910,99 +2910,110 @@
         (wrap-error input-result)
       ::
       =/  input-result-cage=cage  (result-to-cage u.input-result)
-      ::  if the final mark's +grab arm has an arm for the input's mark, use it
       ::
-      ?:  (slob %grab p.final-mark)
-        ::  find +grab within the destination mark core
+      |^  ::  if :final-mark has no +grab arm, grow from the input mark
+          ::
+          ?.  (slob %grab p.final-mark)
+            grow
+          ::  find +grab within the destination mark core
+          ::
+          =/  grab-build=^build
+            [date.build [%ride [%limb %grab] [%$ %noun final-mark]]]
+          ::
+          =^  grab-result  accessed-builds  (depend-on grab-build)
+          ?~  grab-result
+            [build [%blocks [grab-build]~ ~] accessed-builds]
+          ::
+          ?.  ?=([~ %success %ride *] grab-result)
+            (wrap-error grab-result)
+          ::  if the +grab core has no arm for the input mark, grow from input
+          ::
+          ?.  (slob p.input-result-cage p.vase.u.grab-result)
+            grow
+          ::  find an arm for the input's mark within the +grab core
+          ::
+          =/  grab-mark-build=^build
+            :-  date.build
+            [%ride [%limb p.input-result-cage] [%$ %noun vase.u.grab-result]]
+          ::
+          =^  grab-mark-result  accessed-builds  (depend-on grab-mark-build)
+          ?~  grab-mark-result
+            [build [%blocks [grab-mark-build]~ ~] accessed-builds]
+          ::
+          ?.  ?=([~ %success %ride *] grab-mark-result)
+            (wrap-error grab-mark-result)
+          ::  slam the +mark-name:grab gate on the result of running :input
+          ::
+          =/  call-build=^build
+            :-  date.build
+            [%call gate=[%$ %noun vase.u.grab-mark-result] sample=input]
+          ::
+          =^  call-result  accessed-builds  (depend-on call-build)
+          ?~  call-result
+            [build [%blocks [call-build]~ ~] accessed-builds]
+          ::
+          ?.  ?=([~ %success %call *] call-result)
+            (wrap-error call-result)
+          ::
+          =/  =build-result
+            [%success %cast [mark vase.u.call-result]]
+          ::
+          [build [%build-result build-result] accessed-builds]
+      ::  +grow: grow from the input mark to the destination mark
+      ::
+      ++  grow
+        ^-  build-receipt
+        ::  we couldn't grab; try to +grow from the input mark
         ::
-        =/  grab-build=^build
-          [date.build [%ride [%limb %grab] [%$ %noun final-mark]]]
+        =/  starting-mark-path-build=^build
+          [date.build [%path disc %mar p.input-result-cage]]
         ::
-        =^  grab-result  accessed-builds  (depend-on grab-build)
-        ?~  grab-result
-          [build [%blocks [grab-build]~ ~] accessed-builds]
+        =^  starting-mark-path-result  accessed-builds
+          (depend-on starting-mark-path-build)
+        ?~  starting-mark-path-result
+          [build [%blocks [starting-mark-path-build]~ ~] accessed-builds]
         ::
-        ?.  ?=([~ %success %ride *] grab-result)
-          (wrap-error grab-result)
-        ::  find an arm for the input's mark within the core produced by +grab
-        ::  TODO: don't try this if (slob ...) doesn't work
+        ?.  ?=([~ %success %path *] starting-mark-path-result)
+          (wrap-error starting-mark-path-result)
+        ::  slam the +mark-name:grow gate on the result of running :input
+        ::  TODO: replace with %mute sub-build to replace mark sample
         ::
-        =/  grab-mark-build=^build
+        =/  grow-build=^build
           :-  date.build
-          [%ride [%limb p.input-result-cage] [%$ %noun vase.u.grab-result]]
+          :+  %call
+            ::
+            ^=  gate
+            :+  %ride
+              formula=`hoon`[%tsgl [%wing ~[mark]] [%wing ~[%grow]]]
+            subject=`schematic`[%core rail.u.starting-mark-path-result]
+          ::
+          sample=[%$ input-result-cage]
         ::
-        =^  grab-mark-result  accessed-builds  (depend-on grab-mark-build)
-        ?~  grab-mark-result
-          [build [%blocks [grab-mark-build]~ ~] accessed-builds]
+        =^  grow-result  accessed-builds  (depend-on grow-build)
+        ?~  grow-result
+          [build [%blocks [grow-build]~ ~] accessed-builds]
         ::
-        ?.  ?=([~ %success %ride *] grab-mark-result)
-          (wrap-error grab-mark-result)
-        ::  slam the +mark-name:grab gate on the result of running :input
+        ?.  ?=([~ %success %call *] grow-result)
+          (wrap-error grow-result)
+        ::  make sure the product nests in the sample of the destination mark
         ::
-        =/  call-build=^build
-          :-  date.build
-          [%call gate=[%$ %noun vase.u.grab-mark-result] sample=input]
+        =/  bunt-build=^build  [date.build [%bunt disc mark]]
         ::
-        =^  call-result  accessed-builds  (depend-on call-build)
-        ?~  call-result
-          [build [%blocks [call-build]~ ~] accessed-builds]
+        =^  bunt-result  accessed-builds  (depend-on bunt-build)
+        ?~  bunt-result
+          [build [%blocks [bunt-build]~ ~] accessed-builds]
         ::
-        ?.  ?=([~ %success %call *] call-result)
-          (wrap-error call-result)
+        ?.  ?=([~ %success %bunt *] bunt-result)
+          (wrap-error bunt-result)
+        ::
+        ?.  (~(nest ut p.q.cage.u.bunt-result) | p.vase.u.grow-result)
+          (return-error [leaf+"ford: %cast failed: nest fail"]~)
         ::
         =/  =build-result
-          [%success %cast [mark vase.u.call-result]]
+          [%success %cast mark vase.u.grow-result]
         ::
         [build [%build-result build-result] accessed-builds]
-      ::  we couldn't grab; try to +grow from the input mark
-      ::
-      =/  starting-mark-path-build=^build
-        [date.build [%path disc %mar p.input-result-cage]]
-      ::
-      =^  starting-mark-path-result  accessed-builds
-        (depend-on starting-mark-path-build)
-      ?~  starting-mark-path-result
-        [build [%blocks [starting-mark-path-build]~ ~] accessed-builds]
-      ::
-      ?.  ?=([~ %success %path *] starting-mark-path-result)
-        (wrap-error starting-mark-path-result)
-      ::  slam the +mark-name:grow gate on the result of running :input
-      ::
-      =/  grow-build=^build
-        :-  date.build
-        :+  %call
-          ::
-          ^=  gate
-          :+  %ride
-            formula=`hoon`[%tsgl [%wing ~[mark]] [%wing ~[%grow]]]
-          subject=`schematic`[%core rail.u.starting-mark-path-result]
-        ::
-        sample=[%$ input-result-cage]
-      ::
-      =^  grow-result  accessed-builds  (depend-on grow-build)
-      ?~  grow-result
-        [build [%blocks [grow-build]~ ~] accessed-builds]
-      ::
-      ?.  ?=([~ %success %call *] grow-result)
-        (wrap-error grow-result)
-      ::  make sure the product nests in the sample of the destination mark
-      ::
-      =/  bunt-build=^build  [date.build [%bunt disc mark]]
-      ::
-      =^  bunt-result  accessed-builds  (depend-on bunt-build)
-      ?~  bunt-result
-        [build [%blocks [bunt-build]~ ~] accessed-builds]
-      ::
-      ?.  ?=([~ %success %bunt *] bunt-result)
-        (wrap-error bunt-result)
-      ::
-      ?.  (~(nest ut p.q.cage.u.bunt-result) | p.vase.u.grow-result)
-        (return-error [leaf+"ford: %cast failed: nest fail"]~)
-      ::
-      =/  =build-result
-        [%success %cast mark vase.u.grow-result]
-      ::
-      [build [%build-result build-result] accessed-builds]
+      --
     ::
     ++  make-core
       |=  source-path=rail
