@@ -2975,25 +2975,30 @@
         ::
         ?.  ?=([~ %success %path *] starting-mark-path-result)
           (wrap-error starting-mark-path-result)
-        ::  slam the +mark-name:grow gate on the result of running :input
-        ::  TODO: replace with %mute sub-build to replace mark sample
+        ::  grow the value from the initial mark to the final mark
+        ::
+        ::  Replace the input mark's sample with the input's result,
+        ::  then fire the mark-name:grow arm to produce a result.
         ::
         =/  grow-build=^build
           :-  date.build
-          :+  %call
-            ::
-            ^=  gate
-            :+  %ride
-              formula=`hoon`[%tsgl [%wing ~[mark]] [%wing ~[%grow]]]
-            subject=`schematic`[%core rail.u.starting-mark-path-result]
-          ::
-          sample=[%$ input-result-cage]
+          :+  %ride
+            formula=`hoon`[%tsgl [%wing ~[mark]] [%wing ~[%grow]]]
+          ^=  subject
+          ^-  schematic
+          :*  %mute
+              ^-  schematic
+              [%core rail.u.starting-mark-path-result]
+              ^=  mutations
+              ^-  (list [wing schematic])
+              [[%& 6]~ [%$ input-result-cage]]~
+          ==
         ::
         =^  grow-result  accessed-builds  (depend-on grow-build)
         ?~  grow-result
           [build [%blocks [grow-build]~ ~] accessed-builds]
         ::
-        ?.  ?=([~ %success %call *] grow-result)
+        ?.  ?=([~ %success %ride *] grow-result)
           (wrap-error grow-result)
         ::  make sure the product nests in the sample of the destination mark
         ::

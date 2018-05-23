@@ -5139,7 +5139,7 @@
         ::
           %-  expect-eq  !>
           :-  &
-          (~(nest ut p.vase) | -:!>(*^))
+          (~(nest ut p.vase) | -:!>([12 13]))
     ==  ==
   ::
   ;:  weld
