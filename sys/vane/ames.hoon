@@ -537,6 +537,7 @@
           :_  ?:  ?=(%ix -.u.lun.wod.dyr)
                 $(waz t.waz)
               ~
+          ~&  wist+[her=her waz=waz lane=ryn]
           :+  %ouzo  u.lun.wod.dyr
           ?:  &(=(i.waz her) =(~ ryn))  pac
           =+  mal=(jam `meal`[%fore her ryn pac])
@@ -1003,6 +1004,7 @@
         [~ fox]
       =<  zork
       =<  zank
+      ~&  gnaw+[cape=kay lane=ryn cake=kec]
       ::  ~&  [%hear p.p.kec ryn `@p`(mug (shaf %flap pac))]
       %-  ~(chew la:(ho:(um q.p.kec) p.p.kec) kay ryn %none (shaf %flap pac))
       [q.kec r.kec]
