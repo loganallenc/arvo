@@ -2791,6 +2791,123 @@
       ::  if no renderer at :renderer path, try a mark instead
       ::
       ?.  ?=([~ %success %path *] path-result)
+        ::  retrieve the directory listing of :path-to-render
+        ::
+        =/  toplevel-build=^build
+          [date.build [%scry %c %y path-to-render]]
+        ::
+        =^  toplevel-result  accessed-builds  (depend-on toplevel-build)
+        ?~  toplevel-result
+          [build [%blocks [toplevel-build]~ ~] accessed-builds]
+        ::
+        ?.  ?=([~ %success %scry *] toplevel-result)
+          (wrap-error toplevel-result)
+        ::
+        =/  toplevel-arch=arch  ;;(arch q.q.cage.u.toplevel-result)
+        ::  find the :sub-path-segments that could be files
+        ::
+        ::    Filter out path segments that aren't a +term,
+        ::    since those aren't valid marks and therefore can't
+        ::    be the last segment of a filepath in Clay.
+        ::
+        =/  sub-path-segments=(list @ta)
+          (skim (turn ~(tap by dir.toplevel-arch) head) (sane %tas))
+        ::  create :sub-builds to check which :sub-path-segments are files
+        ::
+        =/  sub-builds=(list ^build)
+          %+  turn sub-path-segments
+          |=  sub=@ta
+          ^-  ^build
+          :-  date.build
+          [%scry %c %y path-to-render(spur [sub spur.path-to-render])]
+        ::
+        =|  $=  results
+          (list [kid=^build sub-path=@ta results=(unit build-result)])
+        ::  run :sub-builds
+        ::
+        =/  subs-results
+          |-  ^+  [results accessed-builds]
+          ?~  sub-builds  [results accessed-builds]
+          ?>  ?=(^ sub-paths)
+          ::
+          =/  kid=^build    i.sub-builds
+          =/  sub-path=@ta  i.sub-paths
+          ::
+          =^  result  accessed-builds  (depend-on kid)
+          =.  results  [[kid sub-path result] results]
+          ::
+          $(sub-builds t.sub-builds, sub-paths t.sub-paths)
+        ::  apply mutations from depending on :sub-builds
+        ::
+        =:  results          -.subs-results
+            accessed-builds  +.subs-results
+        ==
+        ::  split :results into completed :mades and incomplete :blocks
+        ::
+        =/  split-results
+          (skid results |=([* * r=(unit build-result)] ?=(^ r)))
+        ::
+        =/  mades=_results   -.split-results
+        =/  blocks=_results  +.split-results
+        ::  if any builds blocked, produce them all as %blocks
+        ::
+        ?^  blocks
+          [build [%blocks (turn `_results`blocks head) ~] accessed-builds]
+        ::  check for errors
+        ::
+        =/  errors=_results
+          %+  skim  results
+          |=  [* * r=(unit build-result)]
+          ?=([~ %error *] r)
+        ::  if any errored, produce the first error, as is tradition
+        ::
+        ?^  errors
+          ?>  ?=([~ %error *] result.i.errors)
+          [build [%complete %error message.u.result.i.errors] accessed-builds]
+        ::  marks: list of the marks of the files at :path-to-render
+        ::
+        =/  marks=(list @tas)
+          %+  murn  results
+          |=  [kid=^build sub-path=@ta result=(unit build-result)]
+          ^-  (unit @tas)
+          ::
+          ?>  ?=([@da %scry %c %y *] kid)
+          ?>  ?=([~ %success %scry *] result)
+          ::
+          =/  =arch  ;;(arch q.q.cage.u.result)
+          ::  if it's a directory, not a file, we can't load it
+          ::
+          ?~  fil.arch
+            ~
+          [~ `@tas`sub-path]
+        ::  sort marks in reverse alphabetical order for convenient traversal
+        ::
+        =.  marks  (sort marks gte)
+        ::
+        =/  alts-build=^build  [date.build [%alts ~]]
+        ::
+        =.  alts-build
+          |-  ^+  alts-build
+          ?~  marks  alts-build
+          ::
+          =/  file=rail  path-to-render(spur [i.marks spur.path-to-render])
+          ::
+          =/  =schematic
+            [%cast disc.file renderer [%scry %c %x file]]
+          ::
+          %=    $
+              choices.schematic.alts-build
+            [schematic choices.schematic.alts-build]
+          ==
+        ::
+        =^  alts-result  accessed-builds  (depend-on alts-build)
+        
+
+        
+
+
+
+
         ::
         =/  mark-build=^build
           :-  date.build
