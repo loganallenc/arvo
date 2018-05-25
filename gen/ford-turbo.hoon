@@ -107,6 +107,7 @@
   test-mute
   test-bake-renderer
   test-bake-mark
+  test-diff
 ==
 ++  test-tear
   :-  `tank`leaf+"test-tear"
@@ -5583,16 +5584,6 @@
   ::
   =/  hoon-src-type=type  [%atom %$ ~]
   ::
-  =/  bar-mark-src=@ta
-    '''
-    |_  sample=[@ @]
-    ++  grab
-      |%
-      +=  noun  [@ @]
-      --
-    --
-    '''
-  ::
   =/  scry-results=(map [term beam] (unit cage))
     %-  my  :~
       :-  [%cx [[~nul %home %da ~1234.5.6] /hoon/foo/mar]]
@@ -5668,6 +5659,80 @@
         %-  expect-eq  !>
         :-  &
         (~(nest ut p.q.cage) | -:!>([12 13]))
+    ==
+  ::
+  ;:  weld
+    results1
+    (expect-ford-empty ford ~nul)
+  ==
+::
+++  test-diff
+  :-  `tank`leaf+"test-diff"
+  ::
+  =/  ford  *ford-gate
+  ::
+  =/  hoon-src-type=type  [%atom %$ ~]
+  ::
+  =/  scry-results=(map [term beam] (unit cage))
+    %-  my  :~
+      :-  [%cx [[~nul %home %da ~1234.5.6] /hoon/foo/mar]]
+      :^  ~  %hoon  hoon-src-type
+      '''
+      |_  cell=^
+      ++  grab
+        |%
+        ++  noun  ^
+        --
+      ++  grad
+        |%
+        ++  diff  |=(^ +<)
+        ++  form  %foo
+        --
+      --
+      '''
+    ==
+  ::
+  =^  results1  ford
+    %-  test-ford-call-with-comparator  :*
+      ford
+      now=~1234.5.6
+      scry=(scry-with-results-and-failures scry-results)
+      ::
+      ::
+      ^=  call-args
+        :*  duct=~[/path]  type=~  %make  ~nul
+            %pin  ~1234.5.6
+            :^  %diff  [~nul %home]
+              [%$ %foo !>([12 13])]
+            [%$ %foo !>([17 18])]
+        ==
+      ::
+      ^=  comparator
+        |=  moves=(list move:ford-gate)
+        ::
+        ?>  =(1 (lent moves))
+        ?>  ?=(^ moves)
+        ?>  ?=([* %give %made @da %complete %success %pin *] i.moves)
+        =/  result  result.p.card.i.moves
+        =/  pin-result  build-result.result
+        ~&  build-result.pin-result
+        ?>  ?=([%success %diff *] build-result.pin-result)
+        ::
+        =/  =cage  cage.build-result.pin-result
+        ::
+        %+  weld
+          %-  expect-eq  !>
+          :-  %foo
+          p.cage
+        ::
+        %+  weld
+          %-  expect-eq  !>
+          :-  [17 18]
+          q.q.cage
+        ::
+        %-  expect-eq  !>
+        :-  &
+        (~(nest ut p.q.cage) | -:!>([17 18]))
     ==
   ::
   ;:  weld
