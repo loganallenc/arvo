@@ -108,6 +108,7 @@
   test-bake-renderer
   test-bake-mark
   test-diff
+  test-diff-form
 ==
 ++  test-tear
   :-  `tank`leaf+"test-tear"
@@ -5733,6 +5734,98 @@
         %-  expect-eq  !>
         :-  &
         (~(nest ut p.q.cage) | -:!>([17 18]))
+    ==
+  ::
+  ;:  weld
+    results1
+    (expect-ford-empty ford ~nul)
+  ==
+::
+++  test-diff-form
+  :-  `tank`leaf+"test-diff-form"
+  ::
+  =/  ford  *ford-gate
+  ::
+  =/  hoon-src-type=type  [%atom %$ ~]
+  ::
+  =/  scry-results=(map [term beam] (unit cage))
+    %-  my  :~
+      :-  [%cx [[~nul %home %da ~1234.5.6] /hoon/txt/mar]]
+      :^  ~  %hoon  hoon-src-type
+      '''
+      |_  txt=wain
+      ++  grab
+        |%
+        ++  noun  wain
+        --
+      ++  grad
+        |%
+        ++  form  %txt-diff
+        ++  diff
+          |=  other-txt=wain
+          ^-  (urge:clay cord)
+          =,  differ
+          (lusk txt other-txt (loss txt other-txt))
+        --
+      --
+      '''
+    ::
+      :-  [%cx [[~nul %home %da ~1234.5.6] /hoon/txt-diff/mar]]
+      :^  ~  %hoon  hoon-src-type
+      '''
+      |_  txt-diff=(urge:clay cord)
+      ++  grab
+        |%
+        ++  noun  (urge:clay cord)
+        --
+      --
+      '''
+    ::
+      :-  [%cx [[~nul %home %da ~1234.5.6] /hoon/diff/txt/mar]]
+      ~
+    ==
+  ::
+  =^  results1  ford
+    %-  test-ford-call-with-comparator  :*
+      ford
+      now=~1234.5.6
+      scry=(scry-with-results-and-failures scry-results)
+      ::
+      ::
+      ^=  call-args
+        :*  duct=~[/path]  type=~  %make  ~nul
+            %pin  ~1234.5.6
+            :^  %diff  [~nul %home]
+              [%$ %txt !>(~[%a %b])]
+            [%$ %txt !>(~[%a %d])]
+        ==
+      ::
+      ^=  comparator
+        |=  moves=(list move:ford-gate)
+        ::
+        ?>  =(1 (lent moves))
+        ?>  ?=(^ moves)
+        ?>  ?=([* %give %made @da %complete %success %pin *] i.moves)
+        =/  result  result.p.card.i.moves
+        =/  pin-result  build-result.result
+        ~&  build-result.pin-result
+        ?>  ?=([%success %diff *] build-result.pin-result)
+        ::
+        =/  =cage  cage.build-result.pin-result
+        ::
+        %+  weld
+          %-  expect-eq  !>
+          :-  %txt-diff
+          p.cage
+        ::
+        %+  weld
+          %-  expect-eq  !>
+          :-  ~[[%& 1] [%| ~[%b] ~[%d]]]
+          q.q.cage
+        ::
+        %-  expect-eq  !>
+        :-  &
+        (~(nest ut p.q.cage) | -:!>(~[[%& 1] [%| ~[%b] ~[%d]]]))
     ==
   ::
   ;:  weld
