@@ -397,12 +397,27 @@
     %-  enclose
     ;:(welp $(build [date head.schematic]) " " $(build [date tail.schematic]))
   ::
+      %core
+    :(welp "[core " (spud (en-beam (rail-to-beam source-path.schematic))) "]")
+  ::
+      %hood
+    :(welp "[hood " (spud (en-beam (rail-to-beam source-path.schematic))) "]")
+  ::
+      %plan
+    :(welp "[plan " (spud (en-beam (rail-to-beam path-to-render.schematic))) "]")
+  ::
       %scry
     (spud (en-beam (extract-beam resource.schematic ~)))
   ::
     ::    %slim
     ::  "slim {<subject-type.schematic>} {<formula.schematic>}"
   ==
+::  +rail-to-beam
+::
+++  rail-to-beam
+  |=  =rail
+  ^-  beam
+  [[ship.disc.rail desk.disc.rail [%ud 0]] spur.rail]
 ::  +unify-jugs: make a new jug, unifying sets for all keys
 ::
 ++  unify-jugs
@@ -1984,6 +1999,7 @@
   ++  make
     |=  =build
     ^-  build-receipt
+    ~&  [%turbo-make (build-to-tape build)]
     ::  accessed-builds: builds accessed/depended on during this run.
     ::
     =|  accessed-builds=(list ^build)

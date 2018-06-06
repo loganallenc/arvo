@@ -132,7 +132,7 @@
   ::
   ++  mo-conf                                           ::  configure
     |=  {dap/dude lum/culm}
-    (mo-boot dap ?:((~(has by bum) dap) %old %new) p.p.lum q.p.lum da+now)
+    (mo-boot dap p.p.lum q.p.lum da+now)
   ::
   ++  mo-pass                                           ::  standard pass
     |=  {pax/path noh/note-arvo}
@@ -177,7 +177,6 @@
     ::
     ?.  (mo-okay q.result-cage)
       (mo-give %onto %| [%leaf "{<dap>}: bogus core"]~)
-    ::  =.  +>  (mo-bold byk dap dep)
     =.  +>.$  (mo-born dap byk q.result-cage)
     =+  old=+>.$
     =+  wag=(ap-prop:(ap-abed:ap dap [%high [~ our]]) ~)
@@ -186,30 +185,6 @@
       (mo-give %onto %| u.-.wag)
     =.  +>.$  ap-abet:+.wag
     (mo-give:(mo-claw dap) %onto %& dap %boot now)
-  ::
-  ++  mo-boom                                           ::  complete new boot
-    |=  {dap/dude byk/beak dep/@uvH gux/gage:ford}
-    ^+  +>
-    ?-    -.gux
-        $tabl  ~|(%made-tabl !!)
-        $|
-      ::  =.  +>  (mo-bold byk dap dep)
-      =.  +>  (mo-give %onto %| p.gux)
-      +>
-        $&
-      ?>  ?=(@ p.p.gux)
-      ?.  (mo-okay q.p.gux)
-        (mo-give %onto %| [%leaf "{<dap>}: bogus core"]~)
-      ::  =.  +>  (mo-bold byk dap dep)
-      =.  +>  (mo-born dap byk q.p.gux)
-      =+  old=+>.$
-      =+  wag=(ap-prop:(ap-abed:ap dap [%high [~ our]]) ~)
-      ?^  -.wag
-        =.  +>.$  old
-        (mo-give %onto %| u.-.wag)
-      =.  +>.$  ap-abet:+.wag
-      (mo-give:(mo-claw dap) %onto %& dap %boot now)
-    ==
   ::
   ++  mo-born                                           ::  new seat
     |=  {dap/dude byk/beak hav/vase}
@@ -226,44 +201,15 @@
         r.zam  [[0 [~ ~]] ~ ~]
       ==
     ==
-  ::
-  ++  mo-boon                                           ::  complete old boot
-    |=  {dap/dude byk/beak dep/@uvH gux/gage:ford}
-    ^+  +>
-    =+  sut=(~(get by bum) dap)
-    ?~  sut
-      ~&  [%gall-old-boon dap]
-      +>.$
-    =.  bum  (~(put by bum) dap u.sut(byk byk))
-    ::  =.  +>.$  (mo-bold byk dap dep)
-    ?-  -.gux
-      $tabl  ~|(%made-tabl !!)
-      $|     (mo-give %onto %| p.gux)
-      $&     ?>  ?=(@ p.p.gux)
-             ap-abet:(ap-peep:(ap-abed:ap dap [%high [~ our]]) q.p.gux)
-    ==
-  ::  ::
-  ::  ++  mo-bold                                           ::  wait for dep
-  ::    |=  {byk/beak dap/dude dep/@uvH}
-  ::    ^+  +>
-  ::    %+  mo-pass  [%sys %dep (scot %p p.byk) q.byk dap ~] 
-  ::    [%f %wasp our dep &] 
-  ::
-
   ::  +mo-boot: sends an %exec to ford.
   ::
-  ::    TODO: We need to move from calling this on every update to calling this
-  ::    once. This has the problem where we keep track of :how, which was how
-  ::    we passed state about building/rebuilding.
-  ::
   ++  mo-boot                                           ::  create ship
-    |=  {dap/dude how/?($new $old) byk/beak}
+    |=  {dap/dude byk/beak}
     ^+  +>
-    ~&  [%mo-boot dap how byk]
+    ~&  [%mo-boot dap byk]
     %+  mo-pass  [%sys %core dap (scot %p p.byk) q.byk (scot r.byk) ~]
     ^-  note-arvo
     [%t %build our [%core [[p q]:byk [%hoon dap %app ~]]]]
-::    [%f %exec our `[byk %core [byk [dap %app ~]]]]
   ::
   ++  mo-away                                           ::  foreign request
     |=  {him/ship caz/cush}                             ::  
@@ -362,28 +308,10 @@
     |=  {pax/path sih/sign-arvo}
     ^+  +>
     ?+    -.pax  !!
-        $dep                                            ::  update
-      ?>  ?=({$f $news *} sih)
-      ?>  ?=({@ @ @ $~} t.pax)
-      %^  mo-boot  i.t.t.t.pax
-        ?:((~(has by bum) i.t.t.t.pax) %old %new)
-      [(slav %p i.t.pax) i.t.t.pax [%da now]]
-    ::
         $core
       ?>  ?=([%t %made *] sih)
       ?>  ?=({@ @ @ @ $~} t.pax)
-      ~!  result.sih
       (mo-recieve-core i.t.pax (mo-chew t.t.pax) result.sih)
-    ::
-        $new
-      ?>  ?=({$f $made *} sih)
-      ?>  ?=({@ @ @ @ $~} t.pax)
-      (mo-boom i.t.pax (mo-chew t.t.pax) +>.sih)
-    ::
-        $old                                            ::  reload old
-      ?>  ?=({$f $made *} sih)
-      ?>  ?=({@ @ @ @ $~} t.pax)
-      (mo-boon i.t.pax (mo-chew t.t.pax) +>.sih)
     ::
         $pel                                            ::  translated peer
       ?>  ?=({@ $~} t.pax)

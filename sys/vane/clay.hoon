@@ -611,6 +611,7 @@
       ?~  aey  [%da `@da`0]
       ?:  =(0 u.aey)  [%da `@da`0]
       [%da t:(aeon-to-yaki:ze u.aey)]
+    ~&  [%wris-hen hen]
     =-  (emit hen %give %wris cas -)
     (~(run in `(set mood)`das) |=(m/mood [p.m r.m]))
   ::
