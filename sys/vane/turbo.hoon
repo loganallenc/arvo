@@ -1,4 +1,3 @@
-!:
 ::  pit: a +vase of the hoon+zuse kernel, which is a deeply nested core
 ::
 |=  pit=vase
@@ -39,9 +38,9 @@
       ::  %f: to ford itself
       ::
       $:  %f
-      ::  %make: perform a build
+      ::  %build: perform a build
       ::
-      $%  $:  %make
+      $%  $:  %build
               ::  schematic: the schematic to build
               ::
               =schematic
@@ -1914,7 +1913,7 @@
               `[%sing care.scry-request case=[%da date] (flop s.beam.scry-request)]
           ==
         ::
-        [duct=~ [%pass wire note]]
+        [duct [%pass wire note]]
       ::  +register-sub-build-blocks: book-keeping on blocked builds
       ::
       ::    When we receive a %blocks +build-receipt, we need to register that
@@ -4818,7 +4817,7 @@
         ::
         =.  moves  :_  moves
           ^-  move
-          [duct=~ [%pass wire=(clay-sub-wire disc) note]]
+          [duct [%pass wire=(clay-sub-wire disc) note]]
         ::
         =.  clay-subscriptions.state  (~(del in clay-subscriptions.state) disc)
         ::
@@ -4868,7 +4867,7 @@
     ::
     =.  moves  :_  moves
       ^-  move
-      [duct=~ [%pass wire=(clay-sub-wire disc) note]]
+      [duct [%pass wire=(clay-sub-wire disc) note]]
     ::
     =.  clay-subscriptions.state  (~(put in clay-subscriptions.state) disc)
     ::
@@ -5015,9 +5014,9 @@
     ((hard task:able) p.wrapped-task)
   ::
   ?-    -.task
-      ::  %make: request to perform a build
+      ::  %build: request to perform a build
       ::
-      %make
+      %build
    ::  perform the build indicated by :task
    ::
    ::    First, we find or create the :ship-state for :our.task,
@@ -5035,7 +5034,7 @@
    ::
    [moves ford-gate]
   ::
-      ::  %kill: cancel a %make
+      ::  %kill: cancel a %build
       ::
       %kill
     ::

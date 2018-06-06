@@ -1,3 +1,4 @@
+!:
 ::  ::  %gall, agent execution  
 !?  163
 ::::
@@ -147,6 +148,44 @@
     =+  bol=(slew 12 vax)
     ?~  bol  |
     (~(nest ut p.u.bol) %| -:!>(*bowl))
+  ::  +mo-recieve-core: receives an app core built by ford-turbo
+  ::
+  ++  mo-recieve-core
+    |=  [dap=dude byk=beak made-result=made-result:ford-api]
+    ^+  +>
+    ~&  %recieving-core
+    ::
+    ?:  ?=([%incomplete *] made-result)
+      (mo-give %onto %| tang.made-result)
+    ::
+    =/  build-result  build-result.made-result
+    ::
+    ?:  ?=([%error *] build-result)
+      (mo-give %onto %| message.build-result)
+    ::
+    =/  result-cage=cage  (result-to-cage:ford-api build-result)
+    ::
+    =/  app-data=(unit seat)  (~(get by bum) dap)
+    ?^  app-data
+      ::  update the path
+      ::
+      =.  bum  (~(put by bum) dap u.app-data(byk byk))
+      ::  magic update string from +mo-boon, "complete old boot"
+      ::
+      ap-abet:(ap-peep:(ap-abed:ap dap [%high [~ our]]) q.result-cage)
+    ::  first install of the app
+    ::
+    ?.  (mo-okay q.result-cage)
+      (mo-give %onto %| [%leaf "{<dap>}: bogus core"]~)
+    ::  =.  +>  (mo-bold byk dap dep)
+    =.  +>.$  (mo-born dap byk q.result-cage)
+    =+  old=+>.$
+    =+  wag=(ap-prop:(ap-abed:ap dap [%high [~ our]]) ~)
+    ?^  -.wag
+      =.  +>.$  old
+      (mo-give %onto %| u.-.wag)
+    =.  +>.$  ap-abet:+.wag
+    (mo-give:(mo-claw dap) %onto %& dap %boot now)
   ::
   ++  mo-boom                                           ::  complete new boot
     |=  {dap/dude byk/beak dep/@uvH gux/gage:ford}
@@ -154,14 +193,14 @@
     ?-    -.gux
         $tabl  ~|(%made-tabl !!)
         $|
-      =.  +>  (mo-bold byk dap dep)
+      ::  =.  +>  (mo-bold byk dap dep)
       =.  +>  (mo-give %onto %| p.gux)
       +>
         $&
       ?>  ?=(@ p.p.gux)
       ?.  (mo-okay q.p.gux)
         (mo-give %onto %| [%leaf "{<dap>}: bogus core"]~)
-      =.  +>  (mo-bold byk dap dep)
+      ::  =.  +>  (mo-bold byk dap dep)
       =.  +>  (mo-born dap byk q.p.gux)
       =+  old=+>.$
       =+  wag=(ap-prop:(ap-abed:ap dap [%high [~ our]]) ~)
@@ -196,27 +235,35 @@
       ~&  [%gall-old-boon dap]
       +>.$
     =.  bum  (~(put by bum) dap u.sut(byk byk))
-    =.  +>.$  (mo-bold byk dap dep)
+    ::  =.  +>.$  (mo-bold byk dap dep)
     ?-  -.gux
       $tabl  ~|(%made-tabl !!)
       $|     (mo-give %onto %| p.gux)
       $&     ?>  ?=(@ p.p.gux)
              ap-abet:(ap-peep:(ap-abed:ap dap [%high [~ our]]) q.p.gux)
     ==
+  ::  ::
+  ::  ++  mo-bold                                           ::  wait for dep
+  ::    |=  {byk/beak dap/dude dep/@uvH}
+  ::    ^+  +>
+  ::    %+  mo-pass  [%sys %dep (scot %p p.byk) q.byk dap ~] 
+  ::    [%f %wasp our dep &] 
   ::
-  ++  mo-bold                                           ::  wait for dep
-    |=  {byk/beak dap/dude dep/@uvH}
-    ^+  +>
-    %+  mo-pass  [%sys %dep (scot %p p.byk) q.byk dap ~] 
-    [%f %wasp our dep &] 
+
+  ::  +mo-boot: sends an %exec to ford.
+  ::
+  ::    TODO: We need to move from calling this on every update to calling this
+  ::    once. This has the problem where we keep track of :how, which was how
+  ::    we passed state about building/rebuilding.
   ::
   ++  mo-boot                                           ::  create ship
     |=  {dap/dude how/?($new $old) byk/beak}
     ^+  +>
-    ::  ~&  [%mo-boot dap how byk]
-    %+  mo-pass  [%sys how dap (scot %p p.byk) q.byk (scot r.byk) ~]
+    ~&  [%mo-boot dap how byk]
+    %+  mo-pass  [%sys %core dap (scot %p p.byk) q.byk (scot r.byk) ~]
     ^-  note-arvo
-    [%f %exec our `[byk %core [byk [dap %app ~]]]]
+    [%t %build our [%core [[p q]:byk [%hoon dap %app ~]]]]
+::    [%f %exec our `[byk %core [byk [dap %app ~]]]]
   ::
   ++  mo-away                                           ::  foreign request
     |=  {him/ship caz/cush}                             ::  
@@ -321,6 +368,12 @@
       %^  mo-boot  i.t.t.t.pax
         ?:((~(has by bum) i.t.t.t.pax) %old %new)
       [(slav %p i.t.pax) i.t.t.pax [%da now]]
+    ::
+        $core
+      ?>  ?=([%t %made *] sih)
+      ?>  ?=({@ @ @ @ $~} t.pax)
+      ~!  result.sih
+      (mo-recieve-core i.t.pax (mo-chew t.t.pax) result.sih)
     ::
         $new
       ?>  ?=({$f $made *} sih)
@@ -1219,7 +1272,7 @@
         $drop  `%c
         $info  `%c
         %kill  `%t
-        %make  `%t
+        %build  `%t
         $merg  `%c
         $mont  `%c
         $nuke  `%a
@@ -1244,6 +1297,7 @@
     ?.  (~(has by pol.all) p.p.q.hic)
       ~&  [%gall-not-ours p.p.q.hic]
       [~ ..^$]
+    =-  ~&  [%moves -.-]  -
     mo-abet:(mo-conf:(mo-abed:mo p.p.q.hic hen) q.p.q.hic q.q.hic)
   ::
       $deal

@@ -764,7 +764,7 @@
       ::  send a pinned literal, expects a %made response with pinned literal
       ::
       ^=  call-args
-        [duct=~ type=~ %make ~nul [%pin ~1234.5.6 [%$ %noun !>(**)]]]
+        [duct=~ type=~ %build ~nul [%pin ~1234.5.6 [%$ %noun !>(**)]]]
       ::
       ^=  moves
         :~  :*  duct=~  %give  %made  ~1234.5.6
@@ -787,7 +787,7 @@
       ::  if we autocons the same schematic, we should get two of it as a result
       ::
       ^=  call-args
-        :*  duct=~  type=~  %make  ~nul
+        :*  duct=~  type=~  %build  ~nul
           [%pin ~1234.5.6 [%$ %noun !>(**)] [%$ %noun !>(**)]]
         ==
       ::
@@ -813,7 +813,7 @@
       :: if we autocons different schematics, we get different values
       ::
       ^=  call-args
-        :*  duct=~  type=~  %make  ~nul
+        :*  duct=~  type=~  %build  ~nul
           [%pin ~1234.5.6 [%$ %noun !>(42)] [%$ %noun !>(43)]]
         ==
       ::
@@ -839,7 +839,7 @@
       ::  test a pinned scry which succeeds
       ::
       ^=  call-args
-        :*  duct=~  type=~  %make  ~nul
+        :*  duct=~  type=~  %build  ~nul
             [%pin ~1234.5.6 [%scry %c ren=%x rail=[[~nul %desk] /bar/foo]]]
         ==
       ::
@@ -863,7 +863,7 @@
       ::  attempting to scry a path which fails should produce an error
       ::
       ^=  call-args
-        :*  duct=~  type=~  %make  ~nul
+        :*  duct=~  type=~  %build  ~nul
             [%pin ~1234.5.6 [%scry %c ren=%x rail=[[~nul %desk] /bar/foo]]]
         ==
       ::
@@ -889,7 +889,7 @@
       ::  when we scry on a blocked path, expect a subscription move
       ::
       ^=  call-args
-        :*  duct=~  type=~  %make  ~nul
+        :*  duct=~  type=~  %build  ~nul
             [%pin ~1234.5.6 [%scry %c ren=%x rail=[[~nul %desk] /bar/foo]]]
         ==
       ::
@@ -934,7 +934,7 @@
       scry=(scry-succeed ~1234.5.6 [%noun !>(42)])
       ::
       ^=  call-args
-        :*  duct=~  type=~  %make  ~nul
+        :*  duct=~  type=~  %build  ~nul
             [%scry %c care=%x rail=[[~nul %desk] /bar/foo]]
         ==
       ::
@@ -999,7 +999,7 @@
       ::  perform a live scry, we should get a %made and a clay subscription
       ::
       ^=  call-args
-        :*  duct=~[/first]  type=~  %make  ~nul
+        :*  duct=~[/first]  type=~  %build  ~nul
             [%scry %c care=%x rail=[[~nul %desk] /bar/foo]]
         ==
       ::
@@ -1007,7 +1007,7 @@
         :~  :*  duct=~[/first]  %give  %made  ~1234.5.6  %complete  %success
                 [%scry %noun !>(42)]
             ==
-            :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+            :*  duct=~[/first]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk
                 `[%mult [%da ~1234.5.6] (sy [%x /foo/bar]~)]
     ==  ==  ==
@@ -1020,7 +1020,7 @@
       ::  a second scry from a different duct shouldn't resubscribe
       ::
       ^=  call-args
-        :*  duct=~[/second]  type=~  %make  ~nul
+        :*  duct=~[/second]  type=~  %build  ~nul
             [%scry %c care=%x rail=[[~nul %desk] /bar/foo]]
         ==
       ::
@@ -1039,6 +1039,8 @@
       moves=~
     ==
   ::
+  ::  CORRECTNESS QUESTION: Are we supposed to cancel on the first duct?
+  ::
   =^  results4  ford-gate
     %-  test-ford-call  :*
       ford-gate
@@ -1048,7 +1050,7 @@
       call-args=[duct=~[/second] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/second]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~
     ==  ==  ==
   ::
@@ -1083,7 +1085,7 @@
       now=~1234.5.6
       scry=(scry-blocks blocks)
       ::
-      call-args=[duct=~[/first] type=~ %make ~nul autocons]
+      call-args=[duct=~[/first] type=~ %build ~nul autocons]
       ::
       ^=  comparator
         |=  moves=(list move:ford-gate)
@@ -1092,12 +1094,12 @@
         %-  expect-eq  !>
         :-  (sy moves)
         %-  sy
-        :~  :*  duct=~  %pass
+        :~  :*  duct=~[/first]  %pass
                 wire=/~nul/scry-request/cx/~nul/desk/~1234.5.7/foo/bar
                 %c  %warp  [~nul ~nul]  %desk
                 `[%sing %x [%da ~1234.5.7] /foo/bar]
             ==
-            :*  duct=~  %pass
+            :*  duct=~[/first]  %pass
                 wire=/~nul/scry-request/cx/~nul/desk/~1234.5.8/foo/bar
                 %c  %warp  [~nul ~nul]  %desk
                 `[%sing %x [%da ~1234.5.8] /foo/bar]
@@ -1110,7 +1112,7 @@
       scry=(scry-blocks blocks)
       ::
       ^=  take-args
-        :*  wire=/~nul/scry-request/cx/~nul/desk/~1234.5.7/foo/bar  duct=~
+        :*  wire=/~nul/scry-request/cx/~nul/desk/~1234.5.7/foo/bar  duct=~[/first]
             ^=  wrapped-sign  ^-  (hypo sign:ford-gate)  :-  *type
             :*  %c  %writ  ~  [%x [%da ~1234.5.7] %desk]
                 /bar/foo  %noun  scry-type  %seven
@@ -1171,7 +1173,7 @@
       now=~1234.5.6
       scry=scry-is-forbidden
       ::
-      call-args=[duct=~[/pin] type=~ %make ~nul schematic]
+      call-args=[duct=~[/pin] type=~ %build ~nul schematic]
       ::
       ^=  expected-moves
         :~  :*  duct=~[/pin]  %give  %made  ~1234.5.5  %complete
@@ -1190,7 +1192,7 @@
       now=~1234.5.6
       scry=scry-is-forbidden
       ::
-      call-args=[duct=~[/pin] type=~ %make ~nul schematic]
+      call-args=[duct=~[/pin] type=~ %build ~nul schematic]
       ::
       ^=  expected-moves
         :~  :*  duct=~[/pin]  %give  %made  ~1234.5.7  %complete
@@ -1208,7 +1210,7 @@
       scry=(scry-succeed ~1234.5.8 [%noun !>(42)])
       ::
       ^=  call-args
-        :*  duct=~[/pinned-in-future]  type=~  %make  ~nul
+        :*  duct=~[/pinned-in-future]  type=~  %build  ~nul
             %pin  ~1234.5.7
             %pin  ~1234.5.8
             [%scry %c care=%x rail=[[~nul %desk] /bar/foo]]
@@ -1248,7 +1250,7 @@
       now=~1234.5.6
       scry=scry-42
       ::
-      call-args=[duct=~ type=~ %make ~nul schematic]
+      call-args=[duct=~ type=~ %build ~nul schematic]
       moves=[duct=~ %give %made ~1234.5.6 %complete result]~
     ==
   ::
@@ -1304,7 +1306,7 @@
       scry=scry-blocked
       ::
       ^=  call-args
-        :*  duct=~  type=~  %make  ~nul
+        :*  duct=~  type=~  %build  ~nul
             [%scry %c care=%x rail=[[~nul %desk] /bar/foo]]
         ==
       ::
@@ -1392,18 +1394,18 @@
       scry=scry-blocked
       ::
       ^=  call-args
-        :*  duct=~[/live]  type=~  %make  ~nul
+        :*  duct=~[/live]  type=~  %build  ~nul
             [%scry %c care=%x rail=[[~nul %desk] /bar/foo]]
         ==
       ::
       ^=  moves
-        :~  :*  duct=~  %pass
+        :~  :*  duct=~[/live]  %pass
                 wire=/~nul/scry-request/cx/~nul/desk/~1234.5.6/foo/bar
                 %c  %warp  [~nul ~nul]  %desk
                 ~  %sing  %x  [%da ~1234.5.6]  /foo/bar
             ==
         ::
-            :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+            :*  duct=~[/live]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk
                 `[%mult [%da ~1234.5.6] (sy [%x /foo/bar]~)]
     ==  ==  ==
@@ -1415,7 +1417,7 @@
       scry=scry-blocked
       ::
       ^=  call-args
-        :*  duct=~[/once]  type=~  %make  ~nul
+        :*  duct=~[/once]  type=~  %build  ~nul
             [%pin ~1234.5.6 [%scry %c ren=%x rail=[[~nul %desk] /bar/foo]]]
         ==
       ::
@@ -1451,7 +1453,7 @@
       call-args=[duct=~[/live] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/live]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~
     ==  ==  ==
   ::
@@ -1476,7 +1478,7 @@
       scry=scry-42
       ::
       ^=  call-args
-        :*  duct=~  type=~  %make  ~nul
+        :*  duct=~  type=~  %build  ~nul
             [%same [%scry %c care=%x rail=[[~nul %desk] /bar/foo]]]
         ==
       ::
@@ -1559,13 +1561,13 @@
       now=~1234.5.6
       scry=scry
       ::
-      call-args=[duct=~[/ride] type=~ %make ~nul same]
+      call-args=[duct=~[/ride] type=~ %build ~nul same]
       ::
       ^=  moves
         :~  :*  duct=~[/ride]  %give  %made  ~1234.5.6  %complete
                 [%success [%same [%success [%ride scry-type %constant]]]]
             ==
-            :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+            :*  duct=~[/ride]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk
                 `[%mult [%da ~1234.5.6] (sy [%x /foo/bar] ~)]
     ==  ==  ==
@@ -1577,13 +1579,13 @@
       scry=scry
       ::
       ^=  take-args
-        :*  wire=/~nul/clay-sub/~nul/desk  duct=~
+        :*  wire=/~nul/clay-sub/~nul/desk  duct=~[/ride]
             ^=  wrapped-sign  ^-  (hypo sign:ford-gate)  :-  *type
             [%c %wris [%da ~1234.5.7] (sy [%x /foo/bar]~)]
         ==
       ::
       ^=  moves
-        :~  :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/ride]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk
                 `[%mult [%da ~1234.5.7] (sy [%x /foo/bar] ~)]
     ==  ==  ==
@@ -1597,7 +1599,7 @@
       call-args=[duct=~[/ride] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/ride]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~
     ==  ==  ==
   ::
@@ -1636,14 +1638,14 @@
       now=~1234.5.6
       scry=scry
       ::
-      call-args=[duct=~[/ride] type=~ %make ~nul autocons]
+      call-args=[duct=~[/ride] type=~ %build ~nul autocons]
       ::
       ^=  moves
         :~  :*  duct=~[/ride]  %give  %made  ~1234.5.6  %complete  %success
                 [%success [%ride ride-type %constant]]
                 [%success [%scry %noun !>(%it-does-in-fact-matter)]]
             ==
-            :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+            :*  duct=~[/ride]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk
                 `[%mult [%da ~1234.5.6] (sy [%x /foo/bar] ~)]
     ==  ==  ==
@@ -1665,7 +1667,7 @@
                 [%success [%ride ride-type %constant]]
                 [%success [%scry %noun !>(%changed)]]
             ==
-            :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+            :*  duct=~[/ride]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk
                 `[%mult [%da ~1234.5.7] (sy [%x /foo/bar] ~)]
     ==  ==  ==
@@ -1679,7 +1681,7 @@
       call-args=[duct=~[/ride] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/ride]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~
     ==  ==  ==
   ::
@@ -1725,7 +1727,7 @@
       now=~1234.5.6
       scry=scry
       ::
-      call-args=[duct=~[/static] type=~ %make ~nul static]
+      call-args=[duct=~[/static] type=~ %build ~nul static]
       ::
       ^=  moves
         :~  :*  duct=~[/static]  %give  %made  ~1234.5.6  %complete  %success
@@ -1740,7 +1742,7 @@
       now=~1234.5.7
       scry=scry
       ::
-      call-args=[duct=~[/autocons] type=~ %make ~nul autocons]
+      call-args=[duct=~[/autocons] type=~ %build ~nul autocons]
       ::
       ^=  moves
         :~  :*  duct=~[/autocons]  %give  %made  ~1234.5.7  %complete  %success
@@ -1798,7 +1800,7 @@
       now=~1234.5.6
       scry=scry-is-forbidden
       ::
-      call-args=[duct=~[/call] type=~ %make ~nul call-schematic]
+      call-args=[duct=~[/call] type=~ %build ~nul call-schematic]
       ::
       ^=  comparator
         |=  moves=(list move:ford-gate)
@@ -1853,7 +1855,7 @@
       now=~1234.5.6
       scry=scry-42
       ::
-      call-args=[duct=~[/call] type=~ %make ~nul call-schematic]
+      call-args=[duct=~[/call] type=~ %build ~nul call-schematic]
       ::
       ^=  comparator
         |=  moves=(list move:ford-gate)
@@ -1908,7 +1910,7 @@
       now=~1234.5.6
       scry=scry-failed
       ::
-      call-args=[duct=~[/dead] type=~ %make ~nul call-schematic]
+      call-args=[duct=~[/dead] type=~ %build ~nul call-schematic]
       ::
       ^=  comparator
         |=  moves=(list move:ford-gate)
@@ -1961,7 +1963,7 @@
       now=~1234.5.6
       scry=scry-blocked
       ::
-      call-args=[duct=~[/live] type=~ %make ~nul call-schematic]
+      call-args=[duct=~[/live] type=~ %build ~nul call-schematic]
       ::
       ^=  moves
         :~  :*  duct=~  %pass
@@ -2067,7 +2069,7 @@
       scry=scry
       ::
       ^=  call-args
-        [duct=~[/call] type=~ %make ~nul call-schematic]
+        [duct=~[/call] type=~ %build ~nul call-schematic]
       ::
       ^=  comparator
         |=  moves=(list move:ford-gate)
@@ -2176,7 +2178,7 @@
       now=~1234.5.6
       scry=scry-42
       ::
-      call-args=[duct=~[/once] type=~ %make ~nul schematic]
+      call-args=[duct=~[/once] type=~ %build ~nul schematic]
       ::
       ^=  moves
         :~  :*  duct=~[/once]  %give  %made  ~1234.5.6  %complete  %success
@@ -2205,7 +2207,7 @@
       now=~1234.5.6
       scry=scry-42
       ::
-      call-args=[duct=~[/once] type=~ %make ~nul schematic]
+      call-args=[duct=~[/once] type=~ %build ~nul schematic]
       ::
       ^=  moves
         :~  :*  duct=~[/once]  %give  %made  ~1234.5.6  %complete
@@ -2242,7 +2244,7 @@
       now=~1234.5.6
       scry=scry
       ::
-      call-args=[duct=~[/hood] type=~ %make ~nul schematic]
+      call-args=[duct=~[/hood] type=~ %build ~nul schematic]
       ::
       ^=  moves
         :~  :*  duct=~[/hood]  %give  %made  ~1234.5.6
@@ -2277,7 +2279,7 @@
       now=~1234.5.6
       scry=scry-is-forbidden
       ::
-      call-args=[duct=~[/dead] type=~ %make ~nul [%slim subject-type formula]]
+      call-args=[duct=~[/dead] type=~ %build ~nul [%slim subject-type formula]]
       ::
       ^=  moves
         :~  :*  duct=~[/dead]  %give  %made  ~1234.5.6  %complete
@@ -2313,7 +2315,7 @@
       now=~1234.5.6
       scry=scry-is-forbidden
       ::
-      call-args=[duct=~[/slit] type=~ %make ~nul [%slit gate sample]]
+      call-args=[duct=~[/slit] type=~ %build ~nul [%slit gate sample]]
       ::
       ^=  comparator
         |=  moves=(list move:ford-gate)
@@ -2361,7 +2363,7 @@
       now=~1234.5.6
       scry=scry-is-forbidden
       ::
-      call-args=[duct=~[/slit] type=~ %make ~nul [%slit gate sample]]
+      call-args=[duct=~[/slit] type=~ %build ~nul [%slit gate sample]]
       ::
       ^=  comparator
         |=  moves=(list move:ford-gate)
@@ -2417,7 +2419,7 @@
       scry=scry-is-forbidden
       ::
       ^=  call-args
-        :*  duct=~[/dead]  type=~  %make  ~nul
+        :*  duct=~[/dead]  type=~  %build  ~nul
             [%ride formula subject-schematic]
         ==
       ::
@@ -2478,7 +2480,7 @@
       scry=scry-42
       ::
       ^=  call-args
-        :*  duct=~[/dead]  type=~  %make  ~nul
+        :*  duct=~[/dead]  type=~  %build  ~nul
             [%ride formula subject-schematic]
         ==
       ::
@@ -2538,7 +2540,7 @@
       scry=scry-failed
       ::
       ^=  call-args
-        :*  duct=~[/dead]  type=~  %make  ~nul
+        :*  duct=~[/dead]  type=~  %build  ~nul
             [%ride formula subject-schematic]
         ==
       ::
@@ -2589,7 +2591,7 @@
       scry=scry-blocked
       ::
       ^=  call-args
-        :*  duct=~[/live]  type=~  %make  ~nul
+        :*  duct=~[/live]  type=~  %build  ~nul
             [%ride formula subject-schematic]
         ==
       ::
@@ -2682,7 +2684,7 @@
       now=~1234.5.6
       scry=scry
       ::
-      call-args=[duct=~[/ride] type=~ %make ~nul ride]
+      call-args=[duct=~[/ride] type=~ %build ~nul ride]
       ::
       ^=  moves
         :~  :*  duct=~[/ride]  %give  %made  ~1234.5.6  %complete
@@ -2769,7 +2771,7 @@
       now=~1234.5.6
       scry=scry
       ::
-      call-args=[duct=~[/post-a] type=~ %make ~nul rendered-a]
+      call-args=[duct=~[/post-a] type=~ %build ~nul rendered-a]
       ::
       ^=  comparator
         |=  moves=(list move:ford-gate)
@@ -2798,7 +2800,7 @@
       now=~1234.5.7
       scry=scry
       ::
-      call-args=[duct=~[/post-b] type=~ %make ~nul rendered-b]
+      call-args=[duct=~[/post-b] type=~ %build ~nul rendered-b]
       ::
       ^=  comparator
         |=  moves=(list move:ford-gate)
@@ -2907,7 +2909,7 @@
       now=~1234.5.6
       scry=scry
       ::
-      call-args=[duct=~[/alts] type=~ %make ~nul alts]
+      call-args=[duct=~[/alts] type=~ %build ~nul alts]
       ::
       ^=  moves
         :~  :*  duct=~[/alts]  %give  %made  ~1234.5.6  %complete
@@ -3023,7 +3025,7 @@
       now=~1234.5.6
       scry=scry
       ::
-      call-args=[duct=~[/same] type=~ %make ~nul same]
+      call-args=[duct=~[/same] type=~ %build ~nul same]
       ::
       ^=  moves
         :~  :*  duct=~[/same]  %give  %made  ~1234.5.6  %complete
@@ -3047,7 +3049,7 @@
       now=~1234.5.7
       scry=scry
       ::
-      call-args=[duct=~[/alts] type=~ %make ~nul alts]
+      call-args=[duct=~[/alts] type=~ %build ~nul alts]
       ::
       ^=  moves
         :~  :*  duct=~[/alts]  %give  %made  ~1234.5.7  %complete
@@ -3171,13 +3173,13 @@
       now=~1234.5.6
       scry=scry
       ::
-      call-args=[duct=~[/first] type=~ %make ~nul alts1]
+      call-args=[duct=~[/first] type=~ %build ~nul alts1]
       ::
       ^=  moves
         :~  :*  duct=~[/first]  %give  %made  ~1234.5.6  %complete
                 %success  %alts  %success  %scry  %noun  scry-type  'scry-two'
             ==
-            :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+            :*  duct=~[/first]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk
                 `[%mult [%da ~1234.5.6] (sy [%x /scry/one] [%x /scry/two] ~)]
     ==  ==  ==
@@ -3189,13 +3191,13 @@
       now=~1234.5.7
       scry=scry
       ::
-      call-args=[duct=~[/second] type=~ %make ~nul alts2]
+      call-args=[duct=~[/second] type=~ %build ~nul alts2]
       ::
       ^=  moves
-        :~  :*  duct=~[/second]  %give  %made  ~1234.5.7  %complete
+        :~  :*  duct=~[/first]  %give  %made  ~1234.5.7  %complete
                 %success  %alts  %success  %scry  %noun  scry-type  'scry-two'
             ==
-            :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+            :*  duct=~[/second]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~  %mult  [%da ~1234.5.7]
                 (sy [%x /scry/one] [%x /scry/two] [%x /scry/three] ~)
     ==  ==  ==
@@ -3209,7 +3211,7 @@
       scry=scry
       ::
       ^=  take-args
-        :*  wire=/~nul/clay-sub/~nul/desk  duct=~
+        :*  wire=/~nul/clay-sub/~nul/desk  duct=~[/second]
             ^=  wrapped-sign  ^-  (hypo sign:ford-gate)  :-  *type
             [%c %wris [%da ~1234.5.8] (sy [%x /scry/three]~)]
         ==
@@ -3218,7 +3220,7 @@
         :~  :*  duct=~[/second]  %give  %made  ~1234.5.8  %complete
                 %success  %alts  %success  %scry  %noun  scry-type  'scry-three'
             ==
-            :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+            :*  duct=~[/second]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~  %mult  [%da ~1234.5.8]
                 (sy [%x /scry/one] [%x /scry/two] [%x /scry/three] ~)
     ==  ==  ==
@@ -3232,16 +3234,16 @@
       scry=scry
       ::
       ^=  take-args
-        :*  wire=/~nul/clay-sub/~nul/desk  duct=~
+        :*  wire=/~nul/clay-sub/~nul/desk  duct=~[/second]
             ^=  wrapped-sign  ^-  (hypo sign:ford-gate)  :-  *type
             [%c %wris [%da ~1234.5.9] (sy [%x /scry/one] [%x /scry/two] ~)]
         ==
       ::
       ^=  moves
-        :~  :*  duct=~[/first]  %give  %made  ~1234.5.9  %complete
+        :~  :*  duct=~[/second]  %give  %made  ~1234.5.9  %complete
                 %success  %alts  %success  %scry  %noun  scry-type  'scry-one'
             ==
-            :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+            :*  duct=~[/second]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~  %mult  [%da ~1234.5.9]
                 (sy [%x /scry/one] [%x /scry/three] ~)
     ==  ==  ==
@@ -3255,7 +3257,7 @@
       call-args=[duct=~[/first] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/first]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~  %mult  [%da ~1234.5.9]
                 (sy [%x /scry/three] ~)
     ==  ==  ==
@@ -3269,7 +3271,7 @@
       call-args=[duct=~[/second] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/second]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~
     ==  ==  ==
   ::
@@ -3295,10 +3297,10 @@
       ::  send a pinned literal, expects a %made response with pinned literal
       ::
       ^=  call-args
-        [duct=~ type=~ %make ~nul [%pin ~1234.5.6 [%$ %noun !>(**)]]]
+        [duct=~[/trivial] type=~ %build ~nul [%pin ~1234.5.6 [%$ %noun !>(**)]]]
       ::
       ^=  moves
-        :~  :*  duct=~  %give  %made  ~1234.5.6
+        :~  :*  duct=~[/trivial]  %give  %made  ~1234.5.6
                 %complete  %success  %pin  ~1234.5.6  %success  %$  %noun  !>(**)
         ==  ==
     ==
@@ -3310,7 +3312,7 @@
       scry=scry-is-forbidden
       ::  ask ford to wipe its cache
       ::
-      call-args=[duct=~ type=~ %wipe ~]
+      call-args=[duct=~[/trivial] type=~ %wipe ~]
       ::  cache wiping should never produce any moves
       ::
       moves=~
@@ -3332,15 +3334,15 @@
       scry=(scry-succeed ~1234.5.6 [%noun !>(42)])
       ::
       ^=  call-args
-        :*  duct=~  type=~  %make  ~nul
+        :*  duct=~[/build]  type=~  %build  ~nul
             [%scry %c care=%x rail=[[~nul %desk] /bar/foo]]
         ==
       ::
       ^=  moves
-        :~  :*  duct=~  %give  %made  ~1234.5.6  %complete  %success
+        :~  :*  duct=~[/build]  %give  %made  ~1234.5.6  %complete  %success
                 [%scry %noun !>(42)]
             ==
-            :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+            :*  duct=~[/build]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk
                 `[%mult [%da ~1234.5.6] (sy [%x /foo/bar]~)]
     ==  ==  ==
@@ -3352,7 +3354,7 @@
       scry=scry-is-forbidden
       ::  ask ford to wipe its cache
       ::
-      call-args=[duct=~ type=~ %wipe ~]
+      call-args=[duct=~[/build] type=~ %wipe ~]
       ::  cache wiping should never produce any moves
       ::
       moves=~
@@ -3365,16 +3367,16 @@
       scry=(scry-succeed ~1234.5.7 [%noun !>(43)])
       ::
       ^=  take-args
-        :*  wire=/~nul/clay-sub/~nul/desk  duct=~
+        :*  wire=/~nul/clay-sub/~nul/desk  duct=~[/build]
             ^=  wrapped-sign  ^-  (hypo sign:ford-gate)  :-  *type
             [%c %wris [%da ~1234.5.7] (sy [%x /foo/bar]~)]
         ==
       ::
       ^=  moves
-        :~  :*  duct=~  %give  %made  ~1234.5.7  %complete  %success
+        :~  :*  duct=~[/build]  %give  %made  ~1234.5.7  %complete  %success
                 [%scry %noun !>(43)]
             ==
-            :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+            :*  duct=~[/build]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk
                 `[%mult [%da ~1234.5.7] (sy [%x /foo/bar]~)]
     ==  ==  ==
@@ -3385,10 +3387,10 @@
       now=~1234.5.8
       scry=scry-is-forbidden
       ::
-      call-args=[duct=~ type=~ %kill ~nul]
+      call-args=[duct=~[/build] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/build]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~
     ==  ==  ==
   ::
@@ -3429,13 +3431,13 @@
       now=~1234.5.6
       scry=scry
       ::
-      call-args=[duct=~[/ride] type=~ %make ~nul same]
+      call-args=[duct=~[/ride] type=~ %build ~nul same]
       ::
       ^=  moves
         :~  :*  duct=~[/ride]  %give  %made  ~1234.5.6  %complete
                 [%success [%same [%success [%ride scry-type %constant]]]]
             ==
-            :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+            :*  duct=~[/ride]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk
                 `[%mult [%da ~1234.5.6] (sy [%x /foo/bar] ~)]
     ==  ==  ==
@@ -3447,7 +3449,7 @@
       scry=scry-is-forbidden
       ::  ask ford to wipe its cache
       ::
-      call-args=[duct=~ type=~ %wipe ~]
+      call-args=[duct=~[/ride] type=~ %wipe ~]
       ::  cache wiping should never produce any moves
       ::
       moves=~
@@ -3460,13 +3462,13 @@
       scry=scry
       ::
       ^=  take-args
-        :*  wire=/~nul/clay-sub/~nul/desk  duct=~
+        :*  wire=/~nul/clay-sub/~nul/desk  duct=~[/ride]
             ^=  wrapped-sign  ^-  (hypo sign:ford-gate)  :-  *type
             [%c %wris [%da ~1234.5.7] (sy [%x /foo/bar]~)]
         ==
       ::
       ^=  moves
-        :~  :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/ride]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk
                 `[%mult [%da ~1234.5.7] (sy [%x /foo/bar] ~)]
     ==  ==  ==
@@ -3480,7 +3482,7 @@
       call-args=[duct=~[/ride] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/ride]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~
     ==  ==  ==
   ::
@@ -3536,7 +3538,7 @@
       now=~1234.5.6
       scry=scry
       ::
-      call-args=[duct=~[/post-a] type=~ %make ~nul rendered-a]
+      call-args=[duct=~[/post-a] type=~ %build ~nul rendered-a]
       ::
       ^=  comparator
         |=  moves=(list move:ford-gate)
@@ -3554,7 +3556,7 @@
           ==
         %-  expect-eq  !>
         :_  i.t.moves
-        :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+        :*  duct=~[/post-a]  %pass  wire=/~nul/clay-sub/~nul/desk
             %c  %warp  [~nul ~nul]  %desk
             `[%mult [%da ~1234.5.6] (sy [%x /posts/a] [%x /posts/b] ~)]
     ==  ==
@@ -3565,7 +3567,7 @@
       now=~1234.5.7
       scry=scry
       ::
-      call-args=[duct=~[/post-b] type=~ %make ~nul rendered-b]
+      call-args=[duct=~[/post-b] type=~ %build ~nul rendered-b]
       ::
       ^=  comparator
         |=  moves=(list move:ford-gate)
@@ -3700,7 +3702,7 @@
       call-args=[duct=~[/post-a] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/post-a]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~
     ==  ==  ==
   ::
@@ -3759,7 +3761,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/reef]  type=~  %make  ~nul
+        :*  duct=~[/reef]  type=~  %build  ~nul
             [%pin ~1234.5.6 [%reef [~nul %base]]]
         ==
       ::
@@ -3809,7 +3811,7 @@
         ``[%cass !>(`cass:clay`[ud=1 da=~1234.5.6])]
       ::
       ^=  call-args
-        :*  duct=~[/reef]  type=~  %make  ~nul
+        :*  duct=~[/reef]  type=~  %build  ~nul
             [%pin ~1234.5.6 [%reef [~nul %home]]]
         ==
       ::
@@ -3861,7 +3863,7 @@
       scry=(scry-with-results-and-failures scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%path disc=[~nul %desk] prefix='lib' raw-path='foo-bar']
         ==
@@ -3889,7 +3891,7 @@
       scry=scry-is-forbidden
       ::
       ^=  call-args
-        :*  duct=~[/plan]  type=~  %make  ~nul
+        :*  duct=~[/plan]  type=~  %build  ~nul
             %pin  ~1234.5.6
             %plan
             source-path=[[~nul %home] /bar/foo]
@@ -3948,7 +3950,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%core source-path=`rail:ford-gate`[[~nul %home] /hoon/foo-bar/lib]]
         ==
@@ -4010,7 +4012,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%core source-path=`rail:ford-gate`[[~nul %home] /hoon/program/gen]]
         ==
@@ -4072,7 +4074,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%core source-path=`rail:ford-gate`[[~nul %home] /hoon/program/gen]]
         ==
@@ -4127,7 +4129,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%core source-path=`rail:ford-gate`[[~nul %home] /hoon/program/gen]]
         ==
@@ -4185,7 +4187,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%core source-path=`rail:ford-gate`[[~nul %home] /hoon/program/gen]]
         ==
@@ -4240,7 +4242,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%core source-path=`rail:ford-gate`[[~nul %home] /hoon/program/gen]]
         ==
@@ -4279,7 +4281,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%core source-path=`rail:ford-gate`[[~nul %home] /hoon/program/gen]]
         ==
@@ -4338,7 +4340,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%core source-path=`rail:ford-gate`[[~nul %home] /hoon/program/gen]]
         ==
@@ -4397,7 +4399,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%core source-path=`rail:ford-gate`[[~nul %home] /hoon/program/gen]]
         ==
@@ -4442,7 +4444,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             :*  %plan  [[~nul %home] /other/lib]  *coin
                 :*  source-rail=[[~nul %desk] /bar/foo]
@@ -4522,7 +4524,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             %core  [[~nul %home] /hoon/program/gen]
         ==
@@ -4585,7 +4587,7 @@
       ::
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%core source-path=`rail:ford-gate`[[~nul %home] /hoon/program/gen]]
         ==
@@ -4654,7 +4656,7 @@
       ::
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%core source-path=`rail:ford-gate`[[~nul %home] /hoon/program/gen]]
         ==
@@ -4710,7 +4712,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             :*  %plan  [[~nul %home] /other/lib]
                 :~  %many
@@ -4819,7 +4821,7 @@
       ::
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%core source-path=`rail:ford-gate`[[~nul %home] /hoon/program/gen]]
         ==
@@ -4897,7 +4899,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             %core  [[~nul %home] /hoon/program/gen]
         ==
@@ -4968,7 +4970,7 @@
       ::
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             %core  [[~nul %home] /hoon/program/gen]
         ==
@@ -5025,7 +5027,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%bunt [~nul %home] %foo]
         ==
@@ -5083,7 +5085,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%volt [~nul %home] %foo [12 13]]
         ==
@@ -5141,7 +5143,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%vale [~nul %home] %foo [12 13]]
         ==
@@ -5199,7 +5201,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%vale [~nul %home] %foo 42]
         ==
@@ -5257,7 +5259,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%cast [~nul %home] %foo [%vale [~nul %home] %bar [12 13]]]
         ==
@@ -5337,7 +5339,7 @@
       scry=(scry-with-results scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%cast [~nul %home] %foo [%vale [~nul %home] %bar [12 13]]]
         ==
@@ -5386,7 +5388,7 @@
       scry=scry-is-forbidden
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             %mute  subject=[%$ %foo !>([a=42 b=[43 c=44]])]
             ^=  mutations  ^-  (list [wing schematic:ford-gate])
@@ -5457,7 +5459,7 @@
       ::
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%bake %foo *coin `rail:ford-gate`[[~nul %home] /data]]
         ==
@@ -5544,7 +5546,7 @@
       ::
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             [%bake %foo *coin `rail:ford-gate`[[~nul %home] /data]]
         ==
@@ -5613,7 +5615,7 @@
       ::
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             :^  %diff  [~nul %home]
               [%$ %foo !>([12 13])]
@@ -5701,7 +5703,7 @@
       scry=(scry-with-results-and-failures scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             :^  %diff  [~nul %home]
               [%$ %txt !>(~[%a %b])]
@@ -5794,7 +5796,7 @@
       scry=(scry-with-results-and-failures scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             :^  %pact  [~nul %home]
               [%$ %txt !>(~[%a %b])]
@@ -5904,7 +5906,7 @@
       scry=(scry-with-results-and-failures scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             :^  %pact  [~nul %home]
               :+  %$  %foo  !>
@@ -5976,7 +5978,7 @@
       scry=(scry-with-results-and-failures scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             :^  %join  [~nul %home]  %txt
             ::  replace %a with %c on the first line
@@ -6045,7 +6047,7 @@
       scry=(scry-with-results-and-failures scry-results)
       ::
       ^=  call-args
-        :*  duct=~[/path]  type=~  %make  ~nul
+        :*  duct=~[/path]  type=~  %build  ~nul
             %pin  ~1234.5.6
             ^-  schematic:ford-gate
             :-  %mash
