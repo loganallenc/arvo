@@ -665,6 +665,7 @@
       $%  [%mass p=mass]                                ::  memory usage
           [%mack p=(unit tang)]                         ::  message ack
           [%sigh p=cage]                                ::  marked http response
+          [%that p=@p q=@ud r=?]                        ::  get proxied request
           [%thou p=httr]                                ::  raw http response
           [%thus p=@ud q=(unit hiss)]                   ::  http request+cancel
           [%veer p=@ta q=path r=@t]                     ::  drop-through
@@ -685,6 +686,7 @@
           [%wegh ~]                                     ::  report memory
           [%went p=sack q=path r=@ud s=coop]            ::  response confirm
           [%west p=sack q=[path *]]                     ::  network request
+          [%wise p=@p q=@ud r=?]                        ::  proxy notification
       ==                                                ::
     --  ::able
   ::
@@ -718,6 +720,7 @@
         [[%get ~] p=@uvH q=[? clip httq]]               ::  remote request
         [[%got ~] p=@uvH q=httr]                        ::  remote response
         [[%gib ~] p=@uvH]                               ::  remote cancel
+        [[%not ~] p=@ud q=?]                            ::  proxy notification
     ==                                                  ::
   ++  hart  {p/? q/(unit @ud) r/host}                   ::  http sec+port+host
   ++  hate  {p/purl q/@p r/moth}                        ::  semi-cooked request

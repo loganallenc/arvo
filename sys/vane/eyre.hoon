@@ -762,9 +762,13 @@
             (ames-gram q.p.kyz aut+~ p.u.mez)
           =.  sop  (~(put by sop) p.u.mez q.p.kyz |)
           (ames-gram q.p.kyz hat+~ p.u.mez our-host)
+      ::
+        $not  +>.$(mow :_(mow [ged [%give %that q.p.kyz p.u.mez q.u.mez]]))
       ==
     ::
       $wegh  !!                                         ::  handled elsewhere
+    ::
+      $wise  (ames-gram p.kyz [%not ~] q.kyz r.kyz)     ::  proxy notification
     ==
   ::
   ::++  axom                                              ::  old response
