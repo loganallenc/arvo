@@ -209,26 +209,35 @@
   ::
   =|  c=cache:ford
   ::
-  =^  a  c
+  =^  x  c
     %-  ~(put in-cache:ford c)
-    [[last-accessed=~1234.5.6 build=[~1234.5.6 [%$ %noun !>(~)]]] max-size=1]
-  =^  b  c
+    [[last-accessed=~1234.5.6 build=[~1234.5.6 [%$ %noun !>(~)]]] max-size=2]
+  =^  y  c
     %-  ~(put in-cache:ford c)
-    [[last-accessed=~1234.5.7 build=[~1234.5.6 [%$ %noun !>(~)]]] max-size=1]
+    [[last-accessed=~1234.5.7 build=[~1234.5.6 [%$ %noun !>(~)]]] max-size=2]
+  =^  z  c
+    %-  ~(put in-cache:ford c)
+    [[last-accessed=~1234.5.8 build=[~1234.5.6 [%$ %noun !>(~)]]] max-size=1]
   ::
   ;:  weld
   ::
     %-  expect-eq  !>
-    :_  a
+    :_  x
     ~
   ::
     %-  expect-eq  !>
-    :_  b
-    `[~1234.5.6 [%$ %noun !>(~)]]
+    :_  y
+    ~
+  ::
+    %-  expect-eq  !>
+    :_  z
+    :~  [~1234.5.7 [%$ %noun !>(~)]]
+        [~1234.5.6 [%$ %noun !>(~)]]
+    ==
   ::
     %-  expect-eq  !>
     :_  c
-    [n=[last-accessed=~1234.5.7 build=[~1234.5.6 [%$ %noun !>(~)]]] ~ ~]
+    [n=[last-accessed=~1234.5.8 build=[~1234.5.6 [%$ %noun !>(~)]]] ~ ~]
   ==
 ::
 ++  test-resource-wire-encoding

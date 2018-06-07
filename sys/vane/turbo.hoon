@@ -299,15 +299,14 @@
   ::
   ++  put
     |=  [e=cache-key max-size=@ud]
-    ^-  [(unit build) _a]
+    ^-  [(list build) _a]
     ::
     =.  a  (put-unsafe e)
     ::
     ?:  (lte size max-size)
       [~ a]
     ::
-    =^  oldest  a  pop-oldest
-    [`oldest a]
+    (resize max-size)
   ::  +put-unsafe: insert an element into the cache without checking size
   ::
   ++  put-unsafe
@@ -347,6 +346,19 @@
     ::  :new goes on top
     ::
     [n.new [n.a l.a l.new] r.new]
+  ::  +resize: pop all oldest builds until the cache reaches :max-size
+  ::
+  ++  resize
+    =|  popped=(list build)
+    |=  max-size=@ud
+    ^-  [(list build) _a]
+    ::
+    ?:  (lte size max-size)
+      [popped a]
+    ::
+    =+  ^-  [oldest=build new-a=_a]  pop-oldest
+    ::
+    $(a new-a, popped [oldest popped])
   ::  +pop-oldest: remove and produce oldest build and cache with it removed
   ::
   ::    Will error if run on an empty +cache.
@@ -362,7 +374,6 @@
     ?~  l.a
       n.a
     $(a l.a)
-    ::
   ::  +del: delete a build from the cache
   ::
   ++  del
