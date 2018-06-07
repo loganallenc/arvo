@@ -841,7 +841,7 @@
         ^-  overview
         %+  turn  ~(tap by a)
           |=  (pair term (pair what foot))
-          =*  doc  (select-arm-docs p.q q.q sut)
+          =/  doc  (select-arm-docs p.q q.q sut)
           [%item (weld "++" (trip p)) -.doc]
       ::
       :>  if {arm-name} is an arm in {c}, returns its documentation.
@@ -887,7 +887,7 @@
       ++  arms-in-chapter
         |=  {sut/type con/coil chapter-id/@}
         ^-  overview
-        =*  chapter-tomb  (~(got by q.s.con) chapter-id)
+        =/  chapter-tomb  (~(got by q.s.con) chapter-id)
         (sort-overview (arms-as-overview q.chapter-tomb sut))
       ::
       :>  sort the items.

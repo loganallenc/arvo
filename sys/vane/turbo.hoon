@@ -966,8 +966,11 @@
       =/  =build  [now schematic]
       ::
       =.  state  (associate-build build duct %.y)
+      ::  TODO: remove me when +sy gets smart.
       ::
-      (execute-loop (sy build ~))
+      =/  builds=(list ^build)  [build ~]
+      ::
+      (execute-loop (sy builds))
     ::
     ++  start-once-build
       ^+  this
@@ -975,8 +978,11 @@
       =/  =build  [pin-date schematic]
       ::
       =.  state  (associate-build build duct %.n)
+      ::  TODO: remove me when +sy gets smart.
       ::
-      (execute-loop (sy build ~))
+      =/  builds=(list ^build)  [build ~]
+      ::
+      (execute-loop (sy builds))
     ::  +associate-build: associate +listener with :build in :state
     ::
     ++  associate-build
