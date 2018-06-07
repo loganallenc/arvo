@@ -267,6 +267,180 @@
       ::
       [%tombstone ~]
   ==
+::  +cache: a treap for caching most recent root builds
+::
+::    Each element of the +cache is a +cache-key, which contains a +build
+::    and its :last-accessed time, which will generally be retrieved from
+::    :results.state.
+::
+::    The cache is designed to contain a fixed number of elements. If inserting
+::    a new build into the cache brings the size above that maximum, the oldest
+::    build will be deleted. This cache is intended to function as a secondary
+::    index into :results.state. When running +cleanup, if a build is present
+::    in the cache, it should not be deleted. Conversely, when the build is
+::    deleted from the cache, +cleanup should be run on it to free resources.
+::
+::    This treap uses the mug of the +cache-key for vertical ordering
+::    and :last-accessed for horizontal ordering. This allows the +cache
+::    to be used as a binary search tree based on :last-accessed and also
+::    to support efficient random access of a +cache-key, both for lookup
+::    and mutation.
+::
++=  cache  (tree cache-key)
++=  cache-key  [last-accessed=@da =build]
+::  +by-cache: interface core for +cache
+::
+++  in-cache
+  |_  a=cache
+  ::  +put: insert an element into the cache and maybe pop off oldest build
+  ::
+  ::    If the number of elements in the cache exceeds :max-size after
+  ::    inserting the new element, pop off the oldest element and produce it.
+  ::
+  ++  put
+    |=  [e=cache-key max-size=@ud]
+    ^-  [(unit build) _a]
+    ::
+    =.  a  (put-unsafe e)
+    ::
+    ?:  (lte size max-size)
+      [~ a]
+    ::
+    =^  oldest  a  pop-oldest
+    [`oldest a]
+  ::  +put-unsafe: insert an element into the cache without checking size
+  ::
+  ++  put-unsafe
+    |=  e=cache-key
+    ^+  a
+    ::  TODO: remove for performance
+    ::
+    =-  ?>(check-correctness(a -) -)
+    ::
+    ?~  a  [n=e l=~ r=~]
+    ::  check horizontal ordering
+    ::
+    ?:  (lth last-accessed.e last-accessed.n.a)
+      ::  new element :new goes on the left
+      ::
+      =/  new  $(a l.a)
+      ?>  ?=(^ new)
+      ::  check vertical ordering
+      ::
+      ?:  (gor n.a n.new)
+        ::  :new goes on bottom
+        ::
+        [n=n.a l=new r=r.a]
+      ::  :new goes on top
+      ::
+      [n=n.new l=l.new r=[n=n.a l=r.new r=r.a]]
+    ::  new element :new goes on the right
+    ::
+    =/  new  $(a r.a)
+    ?>  ?=(^ new)
+    ::  check vertical ordering
+    ::
+    ?:  (gor n.a n.new)
+      ::  :new goes on bottom
+      ::
+      [n.a l.a new]
+    ::  :new goes on top
+    ::
+    [n.new [n.a l.a l.new] r.new]
+  ::  +pop-oldest: remove and produce oldest build and cache with it removed
+  ::
+  ::    Will error if run on an empty +cache.
+  ::
+  ++  pop-oldest
+    ^-  [build cache]
+    ::
+    ?<  ?=(~ a)
+    ::
+    =-  [build.- (del -)]
+    ::
+    |-  ^-  cache-key
+    ?~  l.a
+      n.a
+    $(a l.a)
+    ::
+  ::  +del: delete a build from the cache
+  ::
+  ++  del
+    |=  e=cache-key
+    ^+  a
+    ?~  a  ~
+    ::  TODO: remove for performance
+    ::
+    =-  ?>(check-correctness(a -) -)
+    ::  if we don't fine :e, recurse
+    ::
+    ?.  =(e n.a)
+      ::  check horizontal ordering
+      ::
+      ?:  (lth last-accessed.e last-accessed.n.a)
+        ::  :e is to the left
+        ::
+        [n=n.a l=$(a l.a) r=r.a]
+      ::  :e is to the right
+      ::
+      [n=n.a l=l.a r=$(a r.a)]
+    ::  we found :e at :n.a
+    ::
+    |-  ^-  cache
+    ::  no tree rotation necessary if :l.a or :r.a is empty
+    ::
+    ?~  l.a  r.a
+    ?~  r.a  l.a
+    ::  check vertical ordering to rotate the remaining tree (without :n.a)
+    ::
+    ?:  (gor n.l.a n.r.a)
+      ::  :n.l.a goes above :n.r.a
+      ::
+      [n=n.l.a l=l.l.a r=$(a r.a)]
+    ::  :n.l.a goes below :n.r.a
+    ::
+    [n=n.r.a l=$(r.a l.r.a) r=r.r.a]
+  ::  +has: is the build cached?
+  ::
+  ++  has
+    |=  e=cache-key
+    ^-  ?
+    ::  nothing there, so no :e
+    ::
+    ?~  a
+      |
+    ::  found :e
+    ::
+    ?:  =(e n.a)
+      &
+    ::  check horizontal ordering and recurse on left or right
+    ::
+    ?:  (lth last-accessed.e last-accessed.n.a)
+      $(a l.a)
+    $(a r.a)
+  ::  +size: number of elements in the cache
+  ::
+  ++  size
+    |-  ^-  @ud
+    ?~  a  0
+    ::
+    +((add $(a l.a) $(a r.a)))
+  ::  +check-correctness: make sure treap order is valid
+  ::
+  ::    +cache uses the mug of the element (+gor) for vertical ordering
+  ::    and :last-accessed for horizontal ordering.
+  ::
+  ++  check-correctness
+    =|  [l=(unit cache-key) r=(unit cache-key)]
+    |-  ^-  ?
+    ?~  a   &
+    ::
+    ?&  ?~(l & (lth last-accessed.n.a last-accessed.u.l))
+        ?~(r & (lth last-accessed.u.r last-accessed.n.a))
+        ?~(l.a & ?&((gor n.a n.l.a) $(a l.a, l `n.a)))
+        ?~(r.a & ?&((gor n.a n.r.a) $(a r.a, r `n.a)))
+    ==
+  --
 ::  +listener: either a :live :duct or a once :duct
 ::
 +=  listener

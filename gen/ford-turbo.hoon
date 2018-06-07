@@ -21,6 +21,7 @@
   test-is-schematic-live
   test-date-from-schematic
   test-unify-jugs
+  test-cache-put
   test-resource-wire-encoding
   test-parse-scaffold-direct
   test-parse-scaffold-indirect
@@ -200,6 +201,35 @@
   %+  unify-jugs:ford
     `(jug @tas @ud)`(my ~[[%a (sy 1 2 ~)] [%b (sy 3 4 ~)]])
   `(jug @tas @ud)`(my ~[[%b (sy 5 6 ~)] [%c (sy 7 8 ~)]])
+::
+++  test-cache-put
+  :-  `tank`leaf+"test-cache-put"
+  ::
+  =/  ford  (ford-gate now=~1234.5.6 eny=0xdead.beef scry=scry-is-forbidden)
+  ::
+  =|  c=cache:ford
+  ::
+  =^  a  c
+    %-  ~(put in-cache:ford c)
+    [[last-accessed=~1234.5.6 build=[~1234.5.6 [%$ %noun !>(~)]]] max-size=1]
+  =^  b  c
+    %-  ~(put in-cache:ford c)
+    [[last-accessed=~1234.5.7 build=[~1234.5.6 [%$ %noun !>(~)]]] max-size=1]
+  ::
+  ;:  weld
+  ::
+    %-  expect-eq  !>
+    :_  a
+    ~
+  ::
+    %-  expect-eq  !>
+    :_  b
+    `[~1234.5.6 [%$ %noun !>(~)]]
+  ::
+    %-  expect-eq  !>
+    :_  c
+    [n=[last-accessed=~1234.5.7 build=[~1234.5.6 [%$ %noun !>(~)]]] ~ ~]
+  ==
 ::
 ++  test-resource-wire-encoding
   :-  `tank`leaf+"test-resource-wire-encoding"
