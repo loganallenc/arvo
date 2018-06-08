@@ -22,6 +22,7 @@
   test-date-from-schematic
   test-unify-jugs
   test-cache-put
+  test-cache-has
   test-resource-wire-encoding
   test-parse-scaffold-direct
   test-parse-scaffold-indirect
@@ -238,6 +239,42 @@
     %-  expect-eq  !>
     :_  c
     [n=[last-accessed=~1234.5.8 build=[~1234.5.6 [%$ %noun !>(~)]]] ~ ~]
+  ==
+::
+++  test-cache-has
+  :-  `tank`leaf+"test-cache-has"
+  ::
+  =/  ford  (ford-gate now=~1234.5.6 eny=0xdead.beef scry=scry-is-forbidden)
+  ::
+  =/  build=build:ford  [~1234.5.6 [%$ %noun !>(~)]]
+  ::
+  =|  c=cache:ford
+  ::
+  =^  x  c
+    (~(put in-cache:ford c) [[last-accessed=~1234.5.6 build] max-size=3])
+  =^  y  c
+    (~(put in-cache:ford c) [[last-accessed=~1234.5.7 build] max-size=3])
+  =^  z  c
+    (~(put in-cache:ford c) [[last-accessed=~1234.5.8 build] max-size=3])
+  ::
+  ;:  weld
+  ::
+    %-  expect-eq  !>
+    :-  [~ ~ ~]
+    [x y z]
+  ::
+    %-  expect-eq  !>
+    :-  ~[& & & |]
+    ^-  (list ?)
+    %-  turn
+    :_  ~(has in-cache:ford c)
+    ::
+    ^-  (list cache-key:ford)
+    :~  [last-accessed=~1234.5.6 build]
+        [last-accessed=~1234.5.7 build]
+        [last-accessed=~1234.5.8 build]
+        [last-accessed=~1234.5.9 build]
+    ==
   ==
 ::
 ++  test-resource-wire-encoding
