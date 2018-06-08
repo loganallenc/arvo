@@ -4828,15 +4828,15 @@
     ::  subscription-duct: if any, the duct that previously made a subscription
     ::
     =/  subscription-duct
-      ~!  ~(get by original-clay-subscriptions)
       (~(get by original-clay-subscriptions) disc)
     ::  if no resources on :disc, don't make a new clay subscription
     ::
     ?~  resources
-      ::  cancel any clay subscriptions since we don't have any resources left
+      ::  no resources, no subscriptions, no action.
       ::
       ?~  subscription-duct
         $(discs t.discs)
+      ::  cancel any clay subscriptions since we don't have any resources left
       ::
       =.  moves  :_  moves
         (clay-cancel-subscription-move u.subscription-duct disc)
@@ -4862,11 +4862,12 @@
         ==
       ::
       $(discs t.discs)
-    ::  if we had a previous subscription, cancel it.
+    ::  if we had a previous subscription on a different duct, send a cancel.
     ::
-    ::  =?  moves  ?=(^ subscription-duct)
-    ::    :_  moves
-    ::    (clay-cancel-subscription-move u.subscription-duct disc)
+    =?  moves  &(?=(^ subscription-duct) !=(duct u.subscription-duct))
+      :_  moves
+      (clay-cancel-subscription-move u.subscription-duct disc)
+    ::  send a new clay request using the current duct
     ::
     =.  moves  :_  moves
       (clay-add-subscription-move disc resources)
@@ -5014,7 +5015,7 @@
     ::
     [duct [%pass wire=(clay-sub-wire disc) note]]
 
-  ::  +clay-cancel-subscription-move: builds a cancel 
+  ::  +clay-cancel-subscription-move: builds a cancel move
   ::
   ++  clay-cancel-subscription-move
     |=  [old-duct=^duct =disc]

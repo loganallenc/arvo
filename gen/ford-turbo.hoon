@@ -3058,6 +3058,9 @@
         :~  :*  duct=~[/alts]  %give  %made  ~1234.5.7  %complete
                 %success  %alts  %success  %scry  %noun  scry-type  'scry-two'
             ==
+            :*  duct=~[/same]  %pass  wire=/~nul/clay-sub/~nul/desk
+                %c  %warp  [~nul ~nul]  %desk  ~
+            ==
             :*  duct=~[/alts]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk
                 `[%mult [%da ~1234.5.7] (c-sy [%x /scry/two] [%x /scry/one] ~)]
@@ -3102,7 +3105,10 @@
       call-args=[duct=~[/same] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~[/same]  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/alts]  %pass  wire=/~nul/clay-sub/~nul/desk
+                %c  %warp  [~nul ~nul]  %desk  ~
+            ==
+            :*  duct=~[/same]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk
                 `[%mult [%da ~1234.5.8] (c-sy [%x /scry/one] ~)]
     ==  ==  ==
@@ -3200,6 +3206,9 @@
         :~  :*  duct=~[/second]  %give  %made  ~1234.5.7  %complete
                 %success  %alts  %success  %scry  %noun  scry-type  'scry-two'
             ==
+            :*  duct=~[/first]  %pass  wire=/~nul/clay-sub/~nul/desk
+                %c  %warp  [~nul ~nul]  %desk  ~
+            ==
             :*  duct=~[/second]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~  %mult  [%da ~1234.5.7]
                 (c-sy [%x /scry/one] [%x /scry/two] [%x /scry/three] ~)
@@ -3260,7 +3269,10 @@
       call-args=[duct=~[/first] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~[/first]  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/second]  %pass  wire=/~nul/clay-sub/~nul/desk
+                %c  %warp  [~nul ~nul]  %desk  ~
+            ==
+            :*  duct=~[/first]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~  %mult  [%da ~1234.5.9]
                 (c-sy [%x /scry/three] ~)
     ==  ==  ==
