@@ -1039,8 +1039,6 @@
       moves=~
     ==
   ::
-  ::  CORRECTNESS QUESTION: Are we supposed to cancel on the first duct?
-  ::
   =^  results4  ford-gate
     %-  test-ford-call  :*
       ford-gate
@@ -1050,7 +1048,9 @@
       call-args=[duct=~[/second] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~[/second]  %pass  wire=/~nul/clay-sub/~nul/desk
+        ::  the cancellation should go on the duct that made it: /first
+        ::
+        :~  :*  duct=~[/first]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~
     ==  ==  ==
   ::
@@ -2110,7 +2110,7 @@
       scry=scry
       ::
       ^=  call-args
-        :*  wire=/~nul/clay-sub/~nul/desk  duct=~
+        :*  wire=/~nul/clay-sub/~nul/desk  duct=~[/call]
             ^=  wrapped-sign  ^-  (hypo sign:ford-gate)  :-  *type
             [%c %wris [%da ~1234.5.7] (c-sy [%x /timer]~)]
         ==
@@ -2139,7 +2139,7 @@
         ::
         %-  expect-eq  !>
         :_  i.t.moves
-        :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+        :*  duct=~[/call]  %pass  wire=/~nul/clay-sub/~nul/desk
             %c  %warp  [~nul ~nul]  %desk
             `[%mult [%da ~1234.5.7] (c-sy [%x /timer] ~)]
     ==  ==
@@ -2826,7 +2826,7 @@
       scry=scry
       ::
       ^=  take-args
-        :*  wire=/~nul/clay-sub/~nul/desk  duct=~
+        :*  wire=/~nul/clay-sub/~nul/desk  duct=~[/post-a]
             ^=  wrapped-sign  ^-  (hypo sign:ford-gate)  :-  *type
             [%c %wris [%da ~1234.5.8] (c-sy [%x /posts/a]~)]
         ==
@@ -3116,7 +3116,7 @@
       call-args=[duct=~[/alts] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~[/alts]  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/same]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~
     ==  ==  ==
   ::
@@ -3274,7 +3274,7 @@
       call-args=[duct=~[/second] type=~ %kill ~nul]
       ::
       ^=  moves
-        :~  :*  duct=~[/second]  %pass  wire=/~nul/clay-sub/~nul/desk
+        :~  :*  duct=~[/first]  %pass  wire=/~nul/clay-sub/~nul/desk
                 %c  %warp  [~nul ~nul]  %desk  ~
     ==  ==  ==
   ::
@@ -3592,7 +3592,7 @@
       now=~1234.5.8
       scry=scry-is-forbidden
       ::
-      call-args=[duct=~ type=~ %wipe ~]
+      call-args=[duct=~[/wipe] type=~ %wipe ~]
       moves=~
     ==
   ::
@@ -3603,7 +3603,7 @@
       scry=scry
       ::
       ^=  take-args
-        :*  wire=/~nul/clay-sub/~nul/desk  duct=~
+        :*  wire=/~nul/clay-sub/~nul/desk  duct=~[/post-a]
             ^=  wrapped-sign  ^-  (hypo sign:ford-gate)  :-  *type
             [%c %wris [%da ~1234.5.9] (c-sy [%x /posts/a]~)]
         ==
