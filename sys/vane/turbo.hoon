@@ -116,6 +116,16 @@
       ::    completed live builds, unless it's been asked to wipe its cache.
       ::
       results=(map build cache-line)
+      ::  cache: root builds whose results should be kept temporarily
+      ::
+      ::    This is an LRU cache with a maximum number of builds that
+      ::    can be stored in it. It stores only root builds. While a
+      ::    root build is cached, its sub-builds cannot be deleted.
+      ::
+      =cache
+      ::  max-cache-size: maximum number of builds to store in :cache
+      ::
+      max-cache-size=_128
       ::  builds: registry of all attempted builds
       ::
       builds=build-registry
@@ -180,6 +190,18 @@
   ::
   ::  update tracking
   ::
+      ::  subscribed: are we subscribed to all resources this build depends on?
+      ::
+      ::    For each build we've attempted, did we subscribe to every resource
+      ::    that it or any of its sub-builds depends on? If build foo depends on
+      ::    bar and baz, bar was run live, and baz was not, then foo is not
+      ::    live.
+      ::
+      ::    A %pin build is never live, but its sub-builds could be live if
+      ::    they were run live as part of some other root build that was not
+      ::    pinned.
+      ::
+      subscribed=(map build live=?)
       ::  resources-by-disc: live clay resources
       ::
       ::    Used for looking up which +resource's rely on a particular
@@ -288,170 +310,6 @@
 ::
 +=  cache  (tree cache-key)
 +=  cache-key  [last-accessed=@da =build]
-::  +by-cache: interface core for +cache
-::
-++  in-cache
-  |_  a=cache
-  ::  +put: insert an element into the cache and maybe pop off oldest build
-  ::
-  ::    If the number of elements in the cache exceeds :max-size after
-  ::    inserting the new element, pop off the oldest element and produce it.
-  ::
-  ++  put
-    |=  [e=cache-key max-size=@ud]
-    ^-  [(list build) _a]
-    ::
-    =.  a  (put-unsafe e)
-    ::
-    ?:  (lte size max-size)
-      [~ a]
-    ::
-    (resize max-size)
-  ::  +put-unsafe: insert an element into the cache without checking size
-  ::
-  ++  put-unsafe
-    |=  e=cache-key
-    ^+  a
-    ::  TODO: remove for performance
-    ::
-    =-  ?>(check-correctness(a -) -)
-    ::
-    ?~  a  [n=e l=~ r=~]
-    ::  check horizontal ordering
-    ::
-    ?:  (lth last-accessed.e last-accessed.n.a)
-      ::  new element :new goes on the left
-      ::
-      =/  new  $(a l.a)
-      ?>  ?=(^ new)
-      ::  check vertical ordering
-      ::
-      ?:  (gor n.a n.new)
-        ::  :new goes on bottom
-        ::
-        [n=n.a l=new r=r.a]
-      ::  :new goes on top
-      ::
-      [n=n.new l=l.new r=[n=n.a l=r.new r=r.a]]
-    ::  new element :new goes on the right
-    ::
-    =/  new  $(a r.a)
-    ?>  ?=(^ new)
-    ::  check vertical ordering
-    ::
-    ?:  (gor n.a n.new)
-      ::  :new goes on bottom
-      ::
-      [n.a l.a new]
-    ::  :new goes on top
-    ::
-    [n.new [n.a l.a l.new] r.new]
-  ::  +resize: pop all oldest builds until the cache reaches :max-size
-  ::
-  ++  resize
-    =|  popped=(list build)
-    |=  max-size=@ud
-    ^-  [(list build) _a]
-    ::
-    ?:  (lte size max-size)
-      [popped a]
-    ::
-    =+  ^-  [oldest=build new-a=_a]  pop-oldest
-    ::
-    $(a new-a, popped [oldest popped])
-  ::  +pop-oldest: remove and produce oldest build and cache with it removed
-  ::
-  ::    Will error if run on an empty +cache.
-  ::
-  ++  pop-oldest
-    ^-  [build cache]
-    ::
-    ?<  ?=(~ a)
-    ::
-    =-  [build.- (del -)]
-    ::
-    |-  ^-  cache-key
-    ?~  l.a
-      n.a
-    $(a l.a)
-  ::  +del: delete a build from the cache
-  ::
-  ++  del
-    |=  e=cache-key
-    ^+  a
-    ?~  a  ~
-    ::  TODO: remove for performance
-    ::
-    =-  ?>(check-correctness(a -) -)
-    ::  if we don't fine :e, recurse
-    ::
-    ?.  =(e n.a)
-      ::  check horizontal ordering
-      ::
-      ?:  (lth last-accessed.e last-accessed.n.a)
-        ::  :e is to the left
-        ::
-        [n=n.a l=$(a l.a) r=r.a]
-      ::  :e is to the right
-      ::
-      [n=n.a l=l.a r=$(a r.a)]
-    ::  we found :e at :n.a
-    ::
-    |-  ^-  cache
-    ::  no tree rotation necessary if :l.a or :r.a is empty
-    ::
-    ?~  l.a  r.a
-    ?~  r.a  l.a
-    ::  check vertical ordering to rotate the remaining tree (without :n.a)
-    ::
-    ?:  (gor n.l.a n.r.a)
-      ::  :n.l.a goes above :n.r.a
-      ::
-      [n=n.l.a l=l.l.a r=$(a r.a)]
-    ::  :n.l.a goes below :n.r.a
-    ::
-    [n=n.r.a l=$(r.a l.r.a) r=r.r.a]
-  ::  +has: is the build cached?
-  ::
-  ++  has
-    |=  e=cache-key
-    ^-  ?
-    ::  nothing there, so no :e
-    ::
-    ?~  a
-      |
-    ::  found :e
-    ::
-    ?:  =(e n.a)
-      &
-    ::  check horizontal ordering and recurse on left or right
-    ::
-    ?:  (lth last-accessed.e last-accessed.n.a)
-      $(a l.a)
-    $(a r.a)
-  ::  +size: number of elements in the cache
-  ::
-  ++  size
-    |-  ^-  @ud
-    ?~  a  0
-    ::
-    +((add $(a l.a) $(a r.a)))
-  ::  +check-correctness: make sure treap order is valid
-  ::
-  ::    +cache uses the mug of the element (+gor) for vertical ordering
-  ::    and :last-accessed for horizontal ordering.
-  ::
-  ++  check-correctness
-    =|  [l=(unit cache-key) r=(unit cache-key)]
-    |-  ^-  ?
-    ?~  a   &
-    ::
-    ?&  ?~(l & (lth last-accessed.n.a last-accessed.u.l))
-        ?~(r & (lth last-accessed.u.r last-accessed.n.a))
-        ?~(l.a & ?&((gor n.a n.l.a) $(a l.a, l `n.a)))
-        ?~(r.a & ?&((gor n.a n.r.a) $(a r.a, r `n.a)))
-    ==
-  --
 ::  +listener: either a :live :duct or a once :duct
 ::
 +=  listener
@@ -726,6 +584,193 @@
 ::  +is-listener-live: helper function for loops
 ::
 ++  is-listener-live  |=(=listener live.listener)
+::
+++  cache-key-to-tape
+  |=  e=cache-key
+  ^-  tape
+  ::
+  =/  build-tape=tape  (build-to-tape build.e)
+  "{<last-accessed.e>} {build-tape}"
+::  +by-cache: interface core for +cache
+::
+++  in-cache
+  |_  a=cache
+  ::  +put: insert an element into the cache and maybe pop off oldest build
+  ::
+  ::    If the number of elements in the cache exceeds :max-size after
+  ::    inserting the new element, pop off the oldest element and produce it.
+  ::
+  ++  put
+    |=  [e=cache-key max-size=@ud]
+    ^-  [(list build) _a]
+    ::
+    ~&  [%put (cache-key-to-tape e)]
+    =.  a  (put-unsafe e)
+    ::
+    ?:  (lte size max-size)
+      [~ a]
+    ::
+    (resize max-size)
+  ::  +put-unsafe: insert an element into the cache without checking size
+  ::
+  ++  put-unsafe
+    |=  e=cache-key
+    ^+  a
+    ~&  [%put-unsafe (cache-key-to-tape e)]
+    ::  TODO: remove for performance
+    ::
+    =-  ~|  put-unsafe-fail+-  ?>(check-correctness(a -) -)
+    ::
+    ?~  a  [n=e l=~ r=~]
+    ::  don't duplicate elements
+    ::
+    ?:  =(e n.a)
+      a
+    ::  check horizontal ordering
+    ::
+    ?:  (lth last-accessed.e last-accessed.n.a)
+      ::  new element :new goes on the left
+      ::
+      =/  new  $(a l.a)
+      ?>  ?=(^ new)
+      ::  check vertical ordering
+      ::
+      ?:  (gor n.a n.new)
+        ::  :new goes on bottom
+        ::
+        [n=n.a l=new r=r.a]
+      ::  :new goes on top
+      ::
+      [n=n.new l=l.new r=[n=n.a l=r.new r=r.a]]
+    ::  new element :new goes on the right
+    ::
+    =/  new  $(a r.a)
+    ?>  ?=(^ new)
+    ::  check vertical ordering
+    ::
+    ?:  (gor n.a n.new)
+      ::  :new goes on bottom
+      ::
+      [n.a l.a new]
+    ::  :new goes on top
+    ::
+    [n.new [n.a l.a l.new] r.new]
+  ::  +resize: pop all oldest builds until the cache reaches :max-size
+  ::
+  ++  resize
+    =|  popped=(list build)
+    |=  max-size=@ud
+    ^-  [(list build) _a]
+    ~&  %resize
+    ::  TODO: remove for performance
+    ::
+    =-  ~|  resize-fail+->  ?>(check-correctness(a ->) -)
+    ::
+    ?:  (lte size max-size)
+      [popped a]
+    ::
+    =+  ^-  [oldest=build new-a=_a]  pop-oldest
+    ::
+    $(a new-a, popped [oldest popped])
+  ::  +pop-oldest: remove and produce oldest build and cache with it removed
+  ::
+  ::    Will error if run on an empty +cache.
+  ::
+  ++  pop-oldest
+    ^-  [build cache]
+    ~&  %pop-oldest
+    ::  TODO: remove for performance
+    ::
+    =-  ~|  pop-oldest-fail+->  ?>(check-correctness(a ->) -)
+    ::
+    ?<  ?=(~ a)
+    ::
+    =-  [build.- (del -)]
+    ::
+    |-  ^-  cache-key
+    ?~  l.a
+      n.a
+    $(a l.a)
+  ::  +del: delete a build from the cache
+  ::
+  ++  del
+    |=  e=cache-key
+    ^+  a
+    ?~  a  ~
+    ~&  [%del (cache-key-to-tape e)]
+    ::  TODO: remove for performance
+    ::
+    =-  ~|  del-fail+-  ?>(check-correctness(a -) -)
+    ::  if we don't fine :e, recurse
+    ::
+    ?.  =(e n.a)
+      ::  check horizontal ordering
+      ::
+      ?:  (lth last-accessed.e last-accessed.n.a)
+        ::  :e is to the left
+        ::
+        [n=n.a l=$(a l.a) r=r.a]
+      ::  :e is to the right
+      ::
+      [n=n.a l=l.a r=$(a r.a)]
+    ::  we found :e at :n.a
+    ::
+    |-  ^-  cache
+    ::  no tree rotation necessary if :l.a or :r.a is empty
+    ::
+    ?~  l.a  r.a
+    ?~  r.a  l.a
+    ::  check vertical ordering to rotate the remaining tree (without :n.a)
+    ::
+    ?:  (gor n.l.a n.r.a)
+      ::  :n.l.a goes above :n.r.a
+      ::
+      [n=n.l.a l=l.l.a r=$(a r.a)]
+    ::  :n.l.a goes below :n.r.a
+    ::
+    [n=n.r.a l=$(r.a l.r.a) r=r.r.a]
+  ::  +has: is the build cached?
+  ::
+  ++  has
+    |=  e=cache-key
+    ^-  ?
+    ~&  [%has (cache-key-to-tape e)]
+    ::  nothing there, so no :e
+    ::
+    ?~  a
+      |
+    ::  found :e
+    ::
+    ?:  =(e n.a)
+      &
+    ::  check horizontal ordering and recurse on left or right
+    ::
+    ?:  (lth last-accessed.e last-accessed.n.a)
+      $(a l.a)
+    $(a r.a)
+  ::  +size: number of elements in the cache
+  ::
+  ++  size
+    |-  ^-  @ud
+    ?~  a  0
+    ::
+    +((add $(a l.a) $(a r.a)))
+  ::  +check-correctness: make sure treap order is valid
+  ::
+  ::    +cache uses the mug of the element (+gor) for vertical ordering
+  ::    and :last-accessed for horizontal ordering.
+  ::
+  ++  check-correctness
+    =|  [l=(unit cache-key) r=(unit cache-key)]
+    |-  ^-  ?
+    ?~  a   &
+    ::
+    ?&  ?~(l & (lth last-accessed.n.a last-accessed.u.l))
+        ?~(r & (lth last-accessed.u.r last-accessed.n.a))
+        ?~(l.a & ?&((gor n.a n.l.a) $(a l.a, l `n.a)))
+        ?~(r.a & ?&((gor n.a n.r.a) $(a r.a, r `n.a)))
+    ==
+  --
 ::  +by-schematic: door for manipulating :by-schematic.builds.ford-state
 ::
 ::    The :dates list for each key in :builds is sorted in reverse
@@ -1258,6 +1303,83 @@
     =.  state  (remove-listener-from-build [duct live] build)
     ::
     (cleanup build)
+  ::  +wipe: wipe half a +ford-state's cache, in LRU (least recently used) order
+  ::
+  ::    Delete half the cache, unless the cache is empty. In that case, remove
+  ::    half the build results from :results.state, replacing them with
+  ::    tombstones.
+  ::
+  ++  wipe  ^+  [moves state]
+    ::  +wipe shouldn't affect live dependencies, which means no moves
+    ::
+    =<  ~|  wipe-moves+moves
+        ?>  ?=(~ moves)
+        ::
+        [~ state]
+    ::
+    =/  num-entries=@ud  ~(size in-cache cache.state)
+    ::  if we've already deleted everything in the cache, begin autophagy
+    ::
+    ?:  =(0 num-entries)
+      ..execute(state (wipe-results state))
+    ::
+    =/  num-to-keep=@ud  (div num-entries 2)
+    ::
+    =^  stale-builds  cache.state  (~(resize in-cache cache.state) num-to-keep)
+    ::
+    |-  ^+  ..execute
+    ?~  stale-builds  ..execute
+    ::
+    =.  ..execute  (cleanup i.stale-builds)
+    ::
+    $(stale-builds t.stale-builds)
+  ::
+  ++  wipe-results
+    |=  state=ford-state
+    ^+  state
+    ::
+    =/  cache-list=(list [build cache-line])  ~(tap by results.state)
+    ::
+    =/  split-cache=[(list [build cache-line]) (list [build cache-line])]
+      %+  skid  cache-list
+      |=([=build =cache-line] ?=(%tombstone -.cache-line))
+    ::
+    =/  tombstones=(list [build cache-line])  -.split-cache
+    =/  values=(list [build cache-line])      +.split-cache
+    ::  sort the cache lines in chronological order by :last-accessed
+    ::
+    =/  sorted=(list [build cache-line])
+      %+  sort  values
+      |=  [a=[=build =cache-line] b=[=build =cache-line]]
+      ^-  ?
+      ::
+      ?>  ?=(%value -.cache-line.a)
+      ?>  ?=(%value -.cache-line.b)
+      ::
+      (lte last-accessed.cache-line.a last-accessed.cache-line.b)
+    ::
+    =/  num-entries=@  (lent cache-list)
+    ::  num-stale: half of :num-entries, rounded up in case :num-entries is 1
+    ::
+    =/  num-stale  (sub num-entries (div num-entries 2))
+    ~&  "ford: wipe: {<num-stale>} cache entries"
+    ::
+    =/  stale=(list [build cache-line])  (scag num-stale sorted)
+    =/  fresh=(list [build cache-line])  (slag num-stale sorted)
+    ::
+    =/  stale-tombstones=(list [build cache-line])
+      %+  turn  stale
+      |=  [=build =cache-line]
+      ^+  +<
+      [build [%tombstone ~]]
+    ::
+    =|  results=(map build cache-line)
+    ::
+    =.  results  (~(gas by results) tombstones)
+    =.  results  (~(gas by results) stale-tombstones)
+    =.  results  (~(gas by results) fresh)
+    ::
+    state(results results)
   ::  +remove-listener-from-build: recursively remove listener from (sub)builds
   ::
   ++  remove-listener-from-build
@@ -1300,6 +1422,15 @@
     ::
     =.  listeners.state
       (~(del ju listeners.state) build listener)
+    ::  if there are no more live listeners, mark as no longer subscribed
+    ::
+    =?    subscribed.state
+        ::
+        ?!  %.  is-listener-live
+            %~  any  in
+            (fall (~(get by listeners.state) build) ~)
+      ::
+      (~(put by subscribed.state) build |)
     ::
     =/  sub-builds  (~(get-subs by-build-dag components.state) build)
     ::
@@ -1389,6 +1520,26 @@
         ::
         =^  current-result  results.state  (access-cache build)
         ?:  ?=([~ %value *] current-result)
+          ::  if we've been run as a once build but are now being run live
+          ::
+          ::    Note that this can only happen when the once build and live
+          ::    build are both requested during the same Arvo event with the
+          ::    same `now`. Otherwise, since a live build always starts at
+          ::    `now`, any once builds will be from an earlier timestamp and
+          ::    will therefore appear as :old-build later in this function.
+          ::
+          ?:  ?&  ::  :build has been run as a once build
+                  ::
+                  !(~(got by subscribed.state) build)
+                  ::  :build has live listeners
+                  ::
+                  %.  is-listener-live
+                  %~  any  in
+                  (fall (~(get by listeners.state) build) ~)
+              ==
+            ::
+            (subscribe-to-completed-build-and-subs build)
+          ::
           ..execute
         ::  place :build in :builds.state if it isn't already there
         ::
@@ -1404,7 +1555,13 @@
         ::  copy :old-build's live listeners
         ::
         =.  state  (copy-old-live-listeners u.old-build build)
-        ::  if any resources have changed, we need to rebuild :build
+        ::  if :old-build was a scry that we didn't subscribe to, rerun it
+        ::
+        ?:  ?&  ?=(%scry -.schematic.build)
+                !(~(got by subscribed.state) build)
+            ==
+          (add-build-to-next build)
+        ::  if we know some resources have changed, we need to rebuild :build
         ::
         ?:  (resources-changed build)
           (add-build-to-next build)
@@ -1416,13 +1573,6 @@
         ::  if :u.old-build's result has been wiped, we need to run :build
         ::
         ?:  ?=(%tombstone -.u.old-cache-line)
-          (add-build-to-next build)
-        ::  if any ancestors are pinned, we must rerun
-        ::
-        ::    We can't cleanly promote a once build to a live build because we
-        ::    didn't register its resources in the live tracking system.
-        ::
-        ?:  (has-pinned-client u.old-build)
           (add-build-to-next build)
         ::  old-subs: sub-builds of :u.old-build
         ::
@@ -1446,6 +1596,34 @@
         ::  otherwise, not all new subs have results and we shouldn't be run
         ::
         (on-not-all-subs-have-results build uncached-new-subs)
+      ::  +subscribe-to-completed-build-and-subs: convert from once to live
+      ::
+      ::    If :build has been run as a once build, but now we're running
+      ::    it as a live build, then make subscriptions to any unpinned
+      ::    resources in any of :build's descendants.
+      ::
+      ::    Also mutate :subscribed.state to reflect the new subscriptions.
+      ::
+      ++  subscribe-to-completed-build-and-subs
+        |=  =build
+        ^+  ..execute
+        ::
+        ?:  ?=(%pin -.schematic.build)
+          ..execute
+        ::
+        =?    ..execute
+            ?=(%scry -.schematic.build)
+          (do-live-scry-accounting build)
+        ::
+        =/  sub-builds=(list ^build)
+          (~(get-subs by-build-dag components.state) build)
+        ::
+        |-  ^+  ..execute
+        ?~  sub-builds  ..execute
+        ::
+        =.  ..execute  ^$(build i.sub-builds)
+        ::
+        $(sub-builds t.sub-builds)
       ::  +add-build-to-next: run this build during the +make phase
       ::
       ++  add-build-to-next
@@ -1484,10 +1662,8 @@
       ::    :next-builds.state. Instead, put all the remaining uncached new
       ::    subs into :candidate-builds.state.
       ::
-      ::    If all of our sub-builds finish immediately (i.e. promoted) when
-      ::    they pass through +gather-internal, they will add :build back to
-      ::    :candidate-builds.state and we will run again before +execute runs
-      ::    +make.
+      ::    If all of our sub-builds finish immediately (i.e. promoted),
+      ::    they will add :build back to :candidate-builds.state in +reduce.
       ::
       ++  on-not-all-subs-have-results
         |=  [=build uncached-new-subs=(list build)]
@@ -1730,7 +1906,7 @@
                 (is-build-live build.made)
             ==
           ::
-          (do-live-scry-accounting build.made resource.schematic.build.made)
+          (do-live-scry-accounting build.made)
         ::  process :sub-builds.made
         ::
         =.  state  (track-sub-builds build.made sub-builds.made)
@@ -1742,39 +1918,15 @@
             %blocks
           (apply-blocks build.made result.made sub-builds.made)
         ==
-      ::  +do-live-scry-accounting: updates tracking for a live %scry build
-      ::
-      ++  do-live-scry-accounting
-        |=  [=build =resource]
-        ^+  ..execute
-        =/  =disc  (extract-disc resource)
-        ::
-        %_    ..execute
-        ::  link :disc to :resource
-        ::
-            resources-by-disc.state
-          (~(put ju resources-by-disc.state) [disc resource])
-        ::  mark :disc as dirty
-        ::
-            dirty-discs
-          (~(put in dirty-discs) disc)
-        ::  update :latest-by-disc.state if :date.build is later
-        ::
-            latest-by-disc.state
-          =/  latest-date  (~(get by latest-by-disc.state) disc)
-          ::
-          ?:  ?&  ?=(^ latest-date)
-                  (lte date.build u.latest-date)
-              ==
-            latest-by-disc.state
-          ::
-          (~(put by latest-by-disc.state) disc date.build)
-        ==
       ::  +track-sub-builds:
       ::
       ::    For every sub-build discovered while running :build, we have to make
       ::    sure that we track that sub-build and that it is associated with the
       ::    right listeners.
+      ::
+      ::    TODO: don't we need to recurse downward into sub-sub-builds to
+      ::    copy the listeners?
+      ::    TODO: make subscriptions on previously completed sub-builds.
       ::
       ++  track-sub-builds
         |=  [=build sub-builds=(list build)]
@@ -1856,6 +2008,24 @@
                 !(has-pinned-client u.previous-build)
             ==
           (advance-live-listeners u.previous-build build)
+        ::  if this build is a root build, add it to the cache
+        ::
+        ::    Adding a build to the cache might cause stale builds to be popped
+        ::    off, since the cache has a maximum size.
+        ::
+        =^  stale-builds  cache.state
+          ?.  ?=(^ (root-listeners build))
+            [~ cache.state]
+          (~(put in-cache cache.state) [[now build] max-cache-size.state])
+        ::  cleanup :stale-builds now that they've been popped off the cache
+        ::
+        =.  ..execute
+          |-  ^+  ..execute
+          ?~  stale-builds  ..execute
+          ::
+          =.  ..execute  (cleanup i.stale-builds)
+          ::
+          $(stale-builds t.stale-builds)
         ::  send results to once listeners and delete them
         ::
         ::    Once listeners are deleted as soon as their %made has been sent
@@ -4790,6 +4960,39 @@
     ?:  (is-build-blocked client)
       next-builds
     [client next-builds]
+  ::  +do-live-scry-accounting: updates tracking for a live %scry build
+  ::
+  ++  do-live-scry-accounting
+    |=  build=[date=@da schematic=[%scry =resource]]
+    ^+  ..execute
+    ::
+    =/  =disc  (extract-disc resource.schematic.build)
+    ::
+    %_    ..execute
+    ::  mark :build as subscribed
+    ::
+        subscribed.state
+      (~(put by subscribed.state) build &)
+    ::  link :disc to :resource
+    ::
+        resources-by-disc.state
+      (~(put ju resources-by-disc.state) [disc resource.schematic.build])
+    ::  mark :disc as dirty
+    ::
+        dirty-discs
+      (~(put in dirty-discs) disc)
+    ::  update :latest-by-disc.state if :date.build is later
+    ::
+        latest-by-disc.state
+      =/  latest-date  (~(get by latest-by-disc.state) disc)
+      ::
+      ?:  ?&  ?=(^ latest-date)
+              (lte date.build u.latest-date)
+          ==
+        latest-by-disc.state
+      ::
+      (~(put by latest-by-disc.state) disc date.build)
+    ==
   ::  +send-mades: send one %made move for :build per listener in :listeners
   ::
   ++  send-mades
@@ -4963,6 +5166,18 @@
     ::
     ?:  ?=(%tombstone -.original)
       [`original results.state]
+    ::  freshen cache entry if it exists
+    ::
+    =/  old-cache-key=cache-key  [last-accessed.original build]
+    ::
+    =?    cache.state
+        (~(has in-cache cache.state) old-cache-key)
+      ::
+      =/  new-cache-key=cache-key  old-cache-key(last-accessed now)
+      ::  +put-unsafe is ok because we're deleting an element first
+      ::
+      =-  (~(put-unsafe in-cache -) new-cache-key)
+      (~(del in-cache cache.state) old-cache-key)
     ::
     =/  mutant=cache-line  original(last-accessed now)
     ::
@@ -5074,6 +5289,12 @@
             (~(has by client-builds.provisional-components.state) build)
             (~(has by old.rebuilds.state) build)
             (~(has by listeners.state) build)
+            ::  check if the build is cached
+            ::
+            =/  result  (~(get by results.state) build)
+            ?.  ?=([~ %value *] result)
+              |
+            (~(has by cache.state) [last-accessed.u.result build])
         ==
       ::  ~&  :*  %cleanup-no-op
       ::          build=(build-to-tape build)
@@ -5235,16 +5456,27 @@
       ::
       %wipe
     ::
-    =/  ship-states=(list [@p ford-state])  ~(tap by state-by-ship.ax)
-    ::  wipe each ship in the state separately
+    =/  ship-states=(list [ship=@p state=ford-state])
+      ~(tap by state-by-ship.ax)
     ::
-    =.  state-by-ship.ax
-      %+  roll  ship-states
-      |=  [[ship=@p state=ford-state] accumulator=(map @p ford-state)]
+    =^  moves  state-by-ship.ax
+      =|  moves=(list move)
       ::
-      (~(put by accumulator) ship (wipe state))
+      |-  ^+  [moves state-by-ship.ax]
+      ?~  ship-states  [moves state-by-ship.ax]
+      ::
+      =+  ^-  [ship=@p state=ford-state]  i.ship-states
+      =*  event-args   [[ship duct now scry-gate] state]
+      ::
+      =^  ship-moves  state  wipe:(per-event event-args)
+      ::  apply mutations from the call to +wipe
+      ::
+      =.  moves  (weld moves ship-moves)
+      =.  state-by-ship.ax  (~(put by state-by-ship.ax) ship state)
+      ::
+      $(ship-states t.ship-states)
     ::
-    [~ ford-gate]
+    [moves ford-gate]
   ::
       %wegh
     :_  ford-gate
@@ -5268,54 +5500,6 @@
         [%builds-by-listener [%& builds-by-listener]]
     ==
   ==
-::  +wipe: wipe half a +ford-state's cache, in LRU (least recently used) order
-::
-++  wipe
-  |=  state=ford-state
-  ^+  state
-  ::
-  =/  cache-list=(list [build cache-line])  ~(tap by results.state)
-  ::
-  =/  split-cache=[(list [build cache-line]) (list [build cache-line])]
-    %+  skid  cache-list
-    |=([=build =cache-line] ?=(%tombstone -.cache-line))
-  ::
-  =/  tombstones=(list [build cache-line])  -.split-cache
-  =/  values=(list [build cache-line])      +.split-cache
-  ::  sort the cache lines in chronological order by :last-accessed
-  ::
-  =/  sorted=(list [build cache-line])
-    %+  sort  values
-    |=  [a=[=build =cache-line] b=[=build =cache-line]]
-    ^-  ?
-    ::
-    ?>  ?=(%value -.cache-line.a)
-    ?>  ?=(%value -.cache-line.b)
-    ::
-    (lte last-accessed.cache-line.a last-accessed.cache-line.b)
-  ::
-  =/  num-entries=@  (lent cache-list)
-  ::  num-stale: half of :num-entries, rounded up in case :num-entries is 1
-  ::
-  =/  num-stale  (sub num-entries (div num-entries 2))
-  ~&  "ford: wipe: {<num-stale>} cache entries"
-  ::
-  =/  stale=(list [build cache-line])  (scag num-stale sorted)
-  =/  fresh=(list [build cache-line])  (slag num-stale sorted)
-  ::
-  =/  stale-tombstones=(list [build cache-line])
-    %+  turn  stale
-    |=  [=build =cache-line]
-    ^+  +<
-    [build [%tombstone ~]]
-  ::
-  =|  results=(map build cache-line)
-  ::
-  =.  results  (~(gas by results) tombstones)
-  =.  results  (~(gas by results) stale-tombstones)
-  =.  results  (~(gas by results) fresh)
-  ::
-  state(results results)
 ::  +take: receive a response from another vane
 ::
 ++  take

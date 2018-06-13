@@ -17,109 +17,110 @@
 =-  ((slog -) ~)
 ^-  tang
 ;:  weld
-  test-tear
-  test-is-schematic-live
-  test-date-from-schematic
-  test-unify-jugs
-  test-cache-put
-  test-cache-has
-  test-resource-wire-encoding
-  test-parse-scaffold-direct
-  test-parse-scaffold-indirect
-  test-parse-scaffold-sur-lib
-  test-parse-scaffold-zuse-version
-  test-parse-scaffold-crane-fssg
-  test-parse-scaffold-crane-fsbc
-  test-parse-scaffold-crane-fsbr
-  test-parse-scaffold-crane-fsts
-  test-parse-scaffold-crane-fsdt
-  test-parse-scaffold-crane-fscm
-  test-parse-scaffold-crane-fspm
-  test-parse-scaffold-crane-fscb
-  test-parse-scaffold-crane-fssm
-  test-parse-scaffold-crane-fscl
-  test-parse-scaffold-crane-fskt
-  test-parse-scaffold-crane-fszp
-  test-parse-scaffold-crane-fszy
-  test-literal
-  test-autocons-same
-  test-autocons-different
-  test-scry-clay-succeed
-  test-scry-clay-fail
-  test-scry-clay-block
-  test-scry-clay-live
-  test-scry-clay-live-again
-  test-scry-clay-same-path
-  test-pinned-in-past
-  test-pinned-in-future
-  test-pinned-in-pin
-  test-pinned-in-live
-  test-live-build-that-blocks
-  test-live-and-once
-  test-live-two-deep
-  test-live-three-deep
-  test-live-triangle
-  test-live-and-pinned-triangle
-  test-call
-  test-call-scry-succeed
-  test-call-scry-fail
-  test-call-scry-block
-  test-call-scry-varies
-  test-dude
-  test-dude-error
-  test-hood
-  test-slim
-  test-slit
-  test-slit-error
-  test-ride
-  test-ride-scry-succeed
-  test-ride-scry-fail
-  test-ride-scry-block
-  test-ride-scry-promote
-  test-five-oh-fora
-  test-alts
-  test-alts-and-live
-  test-double-alts
-  test-cache-reclamation-trivial
-  test-cache-reclamation-live-rebuild
-  test-cache-reclamation-live-promote
-  test-five-oh-cache-reclamation
-::  test-reef  ::  very slow
-  test-reef-short-circuit
-  test-path
-  test-plan-direct-hoon
-  test-core
-  test-core-linker
-  test-core-multi-hoon
-  test-core-fsts-fssg
-  test-core-fsdt-fskt
-  test-core-fskt-nest-fail
-  test-core-fssm
-  test-core-fsbr
-  test-core-fsbr-out-of-options
-  test-plan-fszp-as-noun
-  test-core-fszp-as-mark
-  test-core-fscl-fszp
-  test-core-fscm
-  test-plan-fsbc
-  test-core-fscb
-  test-core-fspm
-  test-core-fszy-renderer
-  test-bunt
-  test-volt
-  test-vale
-  test-vale-error
-  test-cast
-  test-cast-grow
-  test-mute
-  test-bake-renderer
-  test-bake-mark
-  test-diff
-  test-diff-form
-  test-pact
-  test-pact-mark
-  test-join
-  test-mash
+::  test-tear
+::  test-is-schematic-live
+::  test-date-from-schematic
+::  test-unify-jugs
+::  test-cache-put
+::  test-cache-has
+::  test-resource-wire-encoding
+::  test-parse-scaffold-direct
+::  test-parse-scaffold-indirect
+::  test-parse-scaffold-sur-lib
+::  test-parse-scaffold-zuse-version
+::  test-parse-scaffold-crane-fssg
+::  test-parse-scaffold-crane-fsbc
+::  test-parse-scaffold-crane-fsbr
+::  test-parse-scaffold-crane-fsts
+::  test-parse-scaffold-crane-fsdt
+::  test-parse-scaffold-crane-fscm
+::  test-parse-scaffold-crane-fspm
+::  test-parse-scaffold-crane-fscb
+::  test-parse-scaffold-crane-fssm
+::  test-parse-scaffold-crane-fscl
+::  test-parse-scaffold-crane-fskt
+::  test-parse-scaffold-crane-fszp
+::  test-parse-scaffold-crane-fszy
+::  test-literal
+::  test-autocons-same
+::  test-autocons-different
+::  test-scry-clay-succeed
+::  test-scry-clay-fail
+::  test-scry-clay-block
+::  test-scry-clay-live
+::  test-scry-clay-live-again
+::  test-scry-clay-same-path
+::  test-pinned-in-past
+::  test-pinned-in-future
+::  test-pinned-in-pin
+::  test-pinned-in-live
+::  test-live-build-that-blocks
+  test-once-and-live
+::  test-live-and-once
+::  test-live-two-deep
+::  test-live-three-deep
+::  test-live-triangle
+::  test-live-and-pinned-triangle
+::  test-call
+::  test-call-scry-succeed
+::  test-call-scry-fail
+::  test-call-scry-block
+::  test-call-scry-varies
+::  test-dude
+::  test-dude-error
+::  test-hood
+::  test-slim
+::  test-slit
+::  test-slit-error
+::  test-ride
+::  test-ride-scry-succeed
+::  test-ride-scry-fail
+::  test-ride-scry-block
+::  test-ride-scry-promote
+::  test-five-oh-fora
+::  test-alts
+::  test-alts-and-live
+::  test-double-alts
+::  test-cache-reclamation-trivial
+::  test-cache-reclamation-live-rebuild
+::  test-cache-reclamation-live-promote
+::  test-five-oh-cache-reclamation
+::::  test-reef  ::  very slow
+::  test-reef-short-circuit
+::  test-path
+::  test-plan-direct-hoon
+::  test-core
+::  test-core-linker
+::  test-core-multi-hoon
+::  test-core-fsts-fssg
+::  test-core-fsdt-fskt
+::  test-core-fskt-nest-fail
+::  test-core-fssm
+::  test-core-fsbr
+::  test-core-fsbr-out-of-options
+::  test-plan-fszp-as-noun
+::  test-core-fszp-as-mark
+::  test-core-fscl-fszp
+::  test-core-fscm
+::  test-plan-fsbc
+::  test-core-fscb
+::  test-core-fspm
+::  test-core-fszy-renderer
+::  test-bunt
+::  test-volt
+::  test-vale
+::  test-vale-error
+::  test-cast
+::  test-cast-grow
+::  test-mute
+::  test-bake-renderer
+::  test-bake-mark
+::  test-diff
+::  test-diff-form
+::  test-pact
+::  test-pact-mark
+::  test-join
+::  test-mash
 ==
 ++  test-tear
   :-  `tank`leaf+"test-tear"
@@ -1441,6 +1442,89 @@
       scry=scry-is-forbidden
       ::
       call-args=[duct=~ type=~ %kill ~nul]
+      ::
+      ^=  moves
+        :~  :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
+                %c  %warp  [~nul ~nul]  %desk  ~
+    ==  ==  ==
+  ::
+  ;:  weld
+    results1
+    results2
+    results3
+    results4
+    (expect-ford-empty ford-gate ~nul)
+  ==
+::
+++  test-once-and-live
+  :-  `tank`leaf+"test-once-and-live"
+  ::
+  =/  scry-blocked  (scry-block ~1234.5.6)
+  =/  scry-42  (scry-succeed ~1234.5.6 [%noun !>(42)])
+  ::
+  =^  results1  ford-gate
+    %-  test-ford-call  :*
+      ford-gate
+      now=~1234.5.6
+      scry=scry-blocked
+      ::
+      ^=  call-args
+        :*  duct=~[/live]  type=~  %make  ~nul
+            [%pin ~1234.5.6 [%scry %c ren=%x rail=[[~nul %desk] /bar/foo]]]
+        ==
+      ::
+      ^=  moves
+        :~  :*  duct=~  %pass
+                wire=/~nul/scry-request/cx/~nul/desk/~1234.5.6/foo/bar
+                %c  %warp  [~nul ~nul]  %desk
+                ~  %sing  %x  [%da ~1234.5.6]  /foo/bar
+    ==  ==  ==
+  ::
+  =^  results2  ford-gate
+    %-  test-ford-call  :*
+      ford-gate
+      now=~1234.5.6  ::  same time as previous request
+      scry=scry-blocked
+      ::
+      ^=  call-args
+        :*  duct=~[/once]  type=~  %make  ~nul
+            [%scry %c care=%x rail=[[~nul %desk] /bar/foo]]
+        ==
+      ::
+      ^=  moves
+        :~  :*  duct=~  %pass
+                wire=/~nul/scry-request/cx/~nul/desk/~1234.5.6/foo/bar
+                %c  %warp  [~nul ~nul]  %desk
+                ~  %sing  %x  [%da ~1234.5.6]  /foo/bar
+    ==  ==  ==
+  ::
+  =^  results3  ford-gate
+    %-  test-ford-take  :*
+      ford-gate
+      now=~1234.5.8
+      scry=scry-is-forbidden
+      ::
+      ^=  take-args
+        :*  wire=/~nul/scry-request/cx/~nul/desk/~1234.5.6/foo/bar  duct=~
+            ^=  wrapped-sign  ^-  (hypo sign:ford-gate)  :-  *type
+            [%c %writ ~ [%x [%da ~1234.5.6] %desk] /bar/foo %noun !>(42)]
+        ==
+      ::
+      ^=  moves
+        :~  :*  duct=~[/live]  %give  %made  ~1234.5.6  %complete
+                [%success [%scry %noun !>(42)]]
+            ==
+            :*  duct=~[/once]  %give  %made  ~1234.5.6  %complete
+                [%success [%pin ~1234.5.6 %success [%scry %noun !>(42)]]]
+    ==  ==  ==
+  ::
+  =^  results4  ford-gate
+    %-  test-ford-call  :*
+      ford-gate
+      now=~1234.5.9
+      scry=scry-is-forbidden
+      ::
+      call-args=[duct=~[/live] type=~ %kill ~nul]
       ::
       ^=  moves
         :~  :*  duct=~  %pass  wire=/~nul/clay-sub/~nul/desk
