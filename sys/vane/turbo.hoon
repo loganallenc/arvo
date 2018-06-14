@@ -651,7 +651,7 @@
     ?>  ?=(^ new)
     ::  check vertical ordering
     ::
-    ?:  (gor n.a n.new)
+    ?:  (v-order n.a n.new)
       ::  :new goes on bottom
       ::
       [n.a l.a new]
@@ -716,7 +716,7 @@
       ::  :e is to the right
       ::
       [n=n.a l=l.a r=$(a r.a)]
-    ::  we found :e at :n.a
+    ::  we found :e at :n.a; delete it and produce the mutant +cache
     ::
     |-  ^-  cache
     ::  no tree rotation necessary if :l.a or :r.a is empty
@@ -728,7 +728,7 @@
     ?:  (v-order n.l.a n.r.a)
       ::  :n.l.a goes above :n.r.a
       ::
-      [n=n.l.a l=l.l.a r=$(a r.a)]
+      [n=n.l.a l=l.l.a r=$(l.a r.l.a)]
     ::  :n.l.a goes below :n.r.a
     ::
     [n=n.r.a l=$(r.a l.r.a) r=r.r.a]
@@ -1327,6 +1327,25 @@
     =.  state  (remove-listener-from-build [duct live] build)
     ::
     (cleanup build)
+  ::  +keep: resize the cache to :max-cache-size elements
+  ::
+  ++  keep
+    |=  max-cache-size=@ud
+    ^+  [moves state]
+    ::
+    =<  finalize
+    ::
+    =.  max-cache-size.state  max-cache-size
+    ::
+    =^  stale-builds  cache.state
+      (~(resize in-cache cache.state) max-cache-size)
+    ::
+    |-  ^+  ..execute
+    ?~  stale-builds  ..execute
+    ::
+    =.  ..execute  (cleanup i.stale-builds)
+    ::
+    $(stale-builds t.stale-builds)
   ::  +wipe: wipe half a +ford-state's cache, in LRU (least recently used) order
   ::
   ::    Delete half the cache, unless the cache is empty. In that case, remove
@@ -5514,9 +5533,36 @@
    ::
    [moves ford-gate]
   ::
+      ::  %keep: resize cache to :max-cache-size
+      ::
+      %keep
+    ::
+    =/  ship-states=(list [ship=@p state=ford-state])
+      ~(tap by state-by-ship.ax)
+    ::
+    =^  moves  state-by-ship.ax
+      =|  moves=(list move)
+      ::
+      |-  ^+  [moves state-by-ship.ax]
+      ?~  ship-states  [moves state-by-ship.ax]
+      ::
+      =+  ^-  [ship=@p state=ford-state]  i.ship-states
+      =*  event-args   [[ship duct now scry-gate] state]
+      ::
+      =^  ship-moves  state  (keep:(per-event event-args) max-cache-size.task)
+      ::  apply mutations from the call to +wipe
+      ::
+      =.  moves  (weld moves ship-moves)
+      =.  state-by-ship.ax  (~(put by state-by-ship.ax) ship state)
+      ::
+      $(ship-states t.ship-states)
+    ::
+    ?>  ?=(~ moves)
+    [moves ford-gate]
+  ::
       ::  %kill: cancel a %make
       ::
-      %kill
+       %kill
     ::
     =/  ship-state  ~|(our+our.task (~(got by state-by-ship.ax) our.task))
     =*  event-args  [[our.task duct now scry-gate] ship-state]
@@ -5526,6 +5572,7 @@
     [moves ford-gate]
   ::
       ::  %wipe: wipe the cache, clearing half the entries
+      ::  TODO: just tombstone, ignoring the cache
       ::
       %wipe
     ::

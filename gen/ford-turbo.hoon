@@ -22,7 +22,7 @@
 ::  test-date-from-schematic
 ::  test-unify-jugs
   test-cache-put
-::  test-cache-has
+  test-cache-has
 ::  test-resource-wire-encoding
 ::  test-parse-scaffold-direct
 ::  test-parse-scaffold-indirect
@@ -44,7 +44,7 @@
 ::  test-literal
 ::  test-autocons-same
 ::  test-autocons-different
-::  test-scry-clay-succeed
+  test-scry-clay-succeed
 ::  test-scry-clay-fail
 ::  test-scry-clay-block
 ::  test-scry-clay-live
@@ -234,14 +234,25 @@
   ::
     %-  expect-eq  !>
     :_  z
-    :~  [~1234.5.6 [%$ %noun !>(~)]]
-        [~1234.5.6 [%$ %noun !>(~)]]
+    :~  [~1234.5.6 schematic]
+        [~1234.5.6 schematic]
     ==
   ::
     %-  expect-eq  !>
-    :_  c
-    =-  [n=[last-accessed=~1234.5.8 build=[~1234.5.6 schematic]] ~ r=-]
-    [n=[last-accessed=~1234.5.8 build=[~1234.5.8 schematic]] ~ ~]
+    :_  `*`c
+    ^-  *
+    :*  ^=  n
+          :-  last-accessed=~1234.5.8
+              build=[date=~1234.5.8 schematic=schematic]
+        ^=  l
+          :*  ^=  n
+                :-  last-accessed=~1234.5.8
+                build=[date=~1234.5.6 schematic=schematic]
+              l=~
+              r=~
+          ==
+        r=~
+    ==
   ==
 ::
 ++  test-cache-has
@@ -6476,6 +6487,8 @@
   |=  [ford-gate=_ford-gate ship=@p]
   ^-  tang
   =/  ford  *ford-gate
+  ::  TODO: split into (keep 0) and then this
+  ::
   %-  expect-eq  !>
   :-  (my [ship *ford-state:ford]~)
   state-by-ship.ax.+>+<.ford

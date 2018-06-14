@@ -889,6 +889,13 @@
               ::
               =schematic
           ==
+          ::  %keep: resize cache to :max-cache-size (not acked)
+          ::
+          $:  %keep
+              ::  max-cache-size: maximum number of root builds to keep
+              ::
+              max-cache-size=@ud
+          ==
           ::  %kill: stop a build; send on same duct as original %make request
           ::
           $:  %kill
@@ -899,7 +906,7 @@
           ::  %wegh: produce memory usage information
           ::
           [%wegh ~]
-          ::  %wipe: clear cache
+          ::  %wipe: clear half the stored results
           ::
           [%wipe ~]
       ==
