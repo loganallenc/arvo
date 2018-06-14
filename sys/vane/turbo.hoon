@@ -604,8 +604,6 @@
     |=  [e=cache-key max-size=@ud]
     ^-  [(list build) _a]
     ::
-    ~&  [%put a (cache-key-to-tape e)]
-    =-  ~&  [%put-result -]  -
     =.  a  (put-unsafe e)
     ::
     ?:  (lte size max-size)
@@ -617,10 +615,6 @@
   ++  put-unsafe
     |=  e=cache-key
     ^+  a
-    ~&  [%put-unsafe (cache-key-to-tape e)]
-    ::  TODO: remove for performance
-    ::
-    =-  ~|  put-unsafe-fail+-  ?>(check-correctness(a -) -)
     ::
     ?~  a  [n=e l=~ r=~]
     ::  don't duplicate elements
@@ -633,7 +627,6 @@
       ::  new element :new goes on the left
       ::
       =/  new  $(a l.a)
-      ~&  put-unsafe-l+new
       ?>  ?=(^ new)
       ::  check vertical ordering
       ::
@@ -647,7 +640,6 @@
     ::  new element :new goes on the right
     ::
     =/  new  $(a r.a)
-      ~&  put-unsafe-r+new
     ?>  ?=(^ new)
     ::  check vertical ordering
     ::
@@ -664,10 +656,6 @@
     =|  popped=(list build)
     |=  max-size=@ud
     ^-  [(list build) _a]
-    ~&  %resize
-    ::  TODO: remove for performance
-    ::
-    =-  ~|  resize-fail+->  ?>(check-correctness(a ->) -)
     ::
     ?:  (lte size max-size)
       [popped a]
@@ -681,10 +669,6 @@
   ::
   ++  pop-oldest
     ^-  [build cache]
-    ~&  %pop-oldest
-    ::  TODO: remove for performance
-    ::
-    =-  ~|  pop-oldest-fail+->  ?>(check-correctness(a ->) -)
     ::
     ?<  ?=(~ a)
     ::
@@ -700,10 +684,6 @@
     |=  e=cache-key
     ^+  a
     ?~  a  ~
-    ~&  [%del (cache-key-to-tape e)]
-    ::  TODO: remove for performance
-    ::
-    =-  ~|  del-fail+-  ?>(check-correctness(a -) -)
     ::  if we don't fine :e, recurse
     ::
     ?.  =(e n.a)
@@ -737,7 +717,6 @@
   ++  has
     |=  e=cache-key
     ^-  ?
-    ~&  [%has (cache-key-to-tape e)]
     ::  nothing there, so no :e
     ::
     ?~  a
@@ -1610,6 +1589,7 @@
         ::  if :old-build was a scry that we didn't subscribe to, rerun it
         ::
         ?:  ?&  ?=(%scry -.schematic.build)
+                ~|  [%not-in-subscribed (build-to-tape build)]
                 !(~(got by subscribed.state) build)
             ==
           (add-build-to-next build)
@@ -5398,9 +5378,20 @@
       ::
       =/  =scry-request
         =,  resource.schematic.build
-        [vane care `beam`[[ship.disc.rail desk.disc.rail [%da date.build]] spur.rail]]
+        :+  vane  care
+        `beam`[[ship.disc.rail desk.disc.rail [%da date.build]] spur.rail]
       ::
       (~(del ju blocks.state) scry-request build)
+    ::  mark that we're no longer subscribed to :build's resource
+    ::
+    ::    If :build is cached, we need to know we're not subscribed to it, so
+    ::    mark its entry in :subscribed.state to `|`. Otherwise, delete the
+    ::    entry entirely.
+    ::
+    =.  subscribed.state
+      ?:  is-build-cached
+        (~(put by subscribed.state) build |)
+      (~(del by subscribed.state) build)
     ::  check if :build depends on a live clay +resource
     ::
     =/  has-live-resource  ?=([%scry %c *] schematic.build)
@@ -5516,22 +5507,22 @@
       ::  %make: request to perform a build
       ::
       %make
-   ::  perform the build indicated by :task
-   ::
-   ::    First, we find or create the :ship-state for :our.task,
-   ::    modifying :state-by-ship as necessary. Then we dispatch to the |ev
-   ::    by constructing :event-args and using them to create :start-build,
-   ::    which performs the build. The result of :start-build is a pair of
-   ::    :moves and a mutant :ship-state. We update our :state-by-ship map
-   ::    with the new :ship-state and produce it along with :moves.
-   ::
-   =^  ship-state  state-by-ship.ax  (find-or-create-ship-state our.task)
-   =*  event-args  [[our.task duct now scry-gate] ship-state]
-   =*  start-build  start-build:(per-event event-args)
-   =^  moves  ship-state  (start-build schematic.task)
-   =.  state-by-ship.ax  (~(put by state-by-ship.ax) our.task ship-state)
-   ::
-   [moves ford-gate]
+    ::  perform the build indicated by :task
+    ::
+    ::    First, we find or create the :ship-state for :our.task,
+    ::    modifying :state-by-ship as necessary. Then we dispatch to the |ev
+    ::    by constructing :event-args and using them to create :start-build,
+    ::    which performs the build. The result of :start-build is a pair of
+    ::    :moves and a mutant :ship-state. We update our :state-by-ship map
+    ::    with the new :ship-state and produce it along with :moves.
+    ::
+    =^  ship-state  state-by-ship.ax  (find-or-create-ship-state our.task)
+    =*  event-args  [[our.task duct now scry-gate] ship-state]
+    =*  start-build  start-build:(per-event event-args)
+    =^  moves  ship-state  (start-build schematic.task)
+    =.  state-by-ship.ax  (~(put by state-by-ship.ax) our.task ship-state)
+    ::
+    [moves ford-gate]
   ::
       ::  %keep: resize cache to :max-cache-size
       ::
@@ -5562,7 +5553,7 @@
   ::
       ::  %kill: cancel a %make
       ::
-       %kill
+      %kill
     ::
     =/  ship-state  ~|(our+our.task (~(got by state-by-ship.ax) our.task))
     =*  event-args  [[our.task duct now scry-gate] ship-state]
@@ -5599,6 +5590,7 @@
     [moves ford-gate]
   ::
       %wegh
+    ::
     :_  ford-gate
     :_  ~
     :^  duct  %give  %mass
