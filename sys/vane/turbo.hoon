@@ -604,7 +604,8 @@
     |=  [e=cache-key max-size=@ud]
     ^-  [(list build) _a]
     ::
-    ~&  [%put (cache-key-to-tape e)]
+    ~&  [%put a (cache-key-to-tape e)]
+    =-  ~&  [%put-result -]  -
     =.  a  (put-unsafe e)
     ::
     ?:  (lte size max-size)
@@ -628,14 +629,15 @@
       a
     ::  check horizontal ordering
     ::
-    ?:  (lth last-accessed.e last-accessed.n.a)
+    ?:  (h-order e n.a)
       ::  new element :new goes on the left
       ::
       =/  new  $(a l.a)
+      ~&  put-unsafe-l+new
       ?>  ?=(^ new)
       ::  check vertical ordering
       ::
-      ?:  (gor n.a n.new)
+      ?:  (v-order n.a n.new)
         ::  :new goes on bottom
         ::
         [n=n.a l=new r=r.a]
@@ -645,6 +647,7 @@
     ::  new element :new goes on the right
     ::
     =/  new  $(a r.a)
+      ~&  put-unsafe-r+new
     ?>  ?=(^ new)
     ::  check vertical ordering
     ::
@@ -706,7 +709,7 @@
     ?.  =(e n.a)
       ::  check horizontal ordering
       ::
-      ?:  (lth last-accessed.e last-accessed.n.a)
+      ?:  (h-order e n.a)
         ::  :e is to the left
         ::
         [n=n.a l=$(a l.a) r=r.a]
@@ -722,7 +725,7 @@
     ?~  r.a  l.a
     ::  check vertical ordering to rotate the remaining tree (without :n.a)
     ::
-    ?:  (gor n.l.a n.r.a)
+    ?:  (v-order n.l.a n.r.a)
       ::  :n.l.a goes above :n.r.a
       ::
       [n=n.l.a l=l.l.a r=$(a r.a)]
@@ -745,7 +748,7 @@
       &
     ::  check horizontal ordering and recurse on left or right
     ::
-    ?:  (lth last-accessed.e last-accessed.n.a)
+    ?:  (h-order e n.a)
       $(a l.a)
     $(a r.a)
   ::  +size: number of elements in the cache
@@ -758,19 +761,40 @@
   ::  +check-correctness: make sure treap order is valid
   ::
   ::    +cache uses the mug of the element (+gor) for vertical ordering
-  ::    and :last-accessed for horizontal ordering.
+  ::    and :last-accessed for horizontal ordering. Oldest builds go on
+  ::    the left, and builds with lower mugs go toward the root.
   ::
   ++  check-correctness
     =|  [l=(unit cache-key) r=(unit cache-key)]
     |-  ^-  ?
     ?~  a   &
     ::
-    ?&  ?~(l & (lth last-accessed.n.a last-accessed.u.l))
-        ?~(r & (lth last-accessed.u.r last-accessed.n.a))
-        ?~(l.a & ?&((gor n.a n.l.a) $(a l.a, l `n.a)))
-        ?~(r.a & ?&((gor n.a n.r.a) $(a r.a, r `n.a)))
+    ?&  =-  ~?  !-  l+l  -
+        ?~(l & (h-order u.l n.a))
+        =-  ~?  !-  r+r  -
+        ?~(r & (h-order n.a u.r))
+        =-  ~?  !-  l-a+l.a  -
+        ?~(l.a & ?&((v-order n.a n.l.a) $(a l.a, r `n.a)))
+        =-  ~?  !-  r-a+r.a  -
+        ?~(r.a & ?&((v-order n.a n.r.a) $(a r.a, l `n.a)))
     ==
-  --
+  ::  +h-order: horizontal ordering: :last-accessed or fall back to +vor
+  ::
+  ::    We use +gor as the fallback because it single-mugs, so it should
+  ::    be uncorrelated to the +vor vertical ordering, which double-mugs.
+  ::
+  ++  h-order
+    |=  [x=cache-key y=cache-key]
+    ^-  ?
+    ?:  (lth last-accessed.x last-accessed.y)
+      &
+    ?:  (gth last-accessed.x last-accessed.y)
+      |
+    (gor x y)
+  ::  +v-order: vertical ordering: compare double-mugged elements
+  ::
+  ++  v-order  vor
+--
 ::  +by-schematic: door for manipulating :by-schematic.builds.ford-state
 ::
 ::    The :dates list for each key in :builds is sorted in reverse

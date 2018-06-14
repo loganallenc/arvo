@@ -21,7 +21,7 @@
 ::  test-is-schematic-live
 ::  test-date-from-schematic
 ::  test-unify-jugs
-::  test-cache-put
+  test-cache-put
 ::  test-cache-has
 ::  test-resource-wire-encoding
 ::  test-parse-scaffold-direct
@@ -55,7 +55,7 @@
 ::  test-pinned-in-pin
 ::  test-pinned-in-live
 ::  test-live-build-that-blocks
-  test-once-and-live
+::  test-once-and-live
 ::  test-live-and-once
 ::  test-live-two-deep
 ::  test-live-three-deep
@@ -209,27 +209,28 @@
   ::
   =/  ford  (ford-gate now=~1234.5.6 eny=0xdead.beef scry=scry-is-forbidden)
   ::
+  =/  schematic=schematic:ford  [%scry %c %x [~nul %home] /]
+  ::
   =|  c=cache:ford
   ::
   =^  x  c
     %-  ~(put in-cache:ford c)
-    [[last-accessed=~1234.5.6 build=[~1234.5.6 [%$ %noun !>(~)]]] max-size=2]
+    [[last-accessed=~1234.5.6 build=[~1234.5.6 schematic]] max-size=2]
   =^  y  c
     %-  ~(put in-cache:ford c)
-    [[last-accessed=~1234.5.7 build=[~1234.5.6 [%$ %noun !>(~)]]] max-size=2]
+    [[last-accessed=~1234.5.7 build=[~1234.5.6 schematic]] max-size=2]
   =^  z  c
     %-  ~(put in-cache:ford c)
-    [[last-accessed=~1234.5.8 build=[~1234.5.6 [%$ %noun !>(~)]]] max-size=1]
+    [[last-accessed=~1234.5.8 build=[~1234.5.6 schematic]] max-size=1]
+  =^  w  c
+    %-  ~(put in-cache:ford c)
+    [[last-accessed=~1234.5.8 build=[~1234.5.8 schematic]] max-size=2]
   ::
   ;:  weld
   ::
     %-  expect-eq  !>
-    :_  x
-    ~
-  ::
-    %-  expect-eq  !>
-    :_  y
-    ~
+    :_  [~ ~ ~]
+    [x y w]
   ::
     %-  expect-eq  !>
     :_  z
@@ -239,7 +240,8 @@
   ::
     %-  expect-eq  !>
     :_  c
-    [n=[last-accessed=~1234.5.8 build=[~1234.5.6 [%$ %noun !>(~)]]] ~ ~]
+    =-  [n=[last-accessed=~1234.5.8 build=[~1234.5.6 schematic]] ~ r=-]
+    [n=[last-accessed=~1234.5.8 build=[~1234.5.8 schematic]] ~ ~]
   ==
 ::
 ++  test-cache-has
