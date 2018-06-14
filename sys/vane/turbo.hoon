@@ -1312,7 +1312,9 @@
   ++  wipe  ^+  [moves state]
     ::  +wipe shouldn't affect live dependencies, which means no moves
     ::
-    =<  ~|  wipe-moves+moves
+    =<  =+  [moves state]=finalize
+        ::
+        ~|  wipe-moves+moves
         ?>  ?=(~ moves)
         ::
         [~ state]
@@ -1386,7 +1388,9 @@
     |=  [=listener =build]
     ^+  state
     ::
-    =?  state  (~(has ju root-listeners.state) build listener)
+    =/  was-root=?  (~(has ju root-listeners.state) build listener)
+    ::
+    =?  state  was-root
       %_    state
           builds-by-listener
         (~(del by builds-by-listener.state) duct.listener)
@@ -1394,6 +1398,11 @@
           root-listeners
         (~(del ju root-listeners.state) build listener)
       ==
+    ::  if we removed the last root listener, place :build in :cache.state
+    ::
+    =?    cache.state
+        &(was-root (~(has by root-listeners.state) build))
+      (~(put by cache.state) now build)
     ::
     =/  original-build  build
     =/  builds=(list ^build)  ~[build]
@@ -1590,7 +1599,7 @@
         ::    We rerun :build because these non-rebuild results might be different,
         ::    possibly giving :build a different result.
         ::
-        =/  uncached-new-subs  (skip new-subs is-build-cached)
+        =/  uncached-new-subs  (skip new-subs is-build-stored)
         ?~  uncached-new-subs
           (add-build-to-next build)
         ::  otherwise, not all new subs have results and we shouldn't be run
@@ -5107,12 +5116,35 @@
     ?.  ?=(%scry -.schematic.build)
       |
     (~(has by blocks.state) resource.schematic.build build)
-  ::  +is-build-cached:
+  ::  +is-build-stored: is :build in :results.state?
   ::
-  ++  is-build-cached
+  ++  is-build-stored
     |=  =build
     ^-  ?
     ?=([~ %value *] (~(get by results.state) build))
+  ::  +is-build-under-cached-root: does :build have a cached ancestor?
+  ::
+  ++  is-build-under-cached-root
+    |=  =build
+    ^-  ?
+    ::
+    =/  is-build-cached=?
+      =/  result  (~(get by results.state) build)
+      ?.  ?=([~ %value *] result)
+        |
+      (~(has by cache.state) [last-accessed.u.result build])
+    ::
+    ?:  is-build-cached
+      &
+    ::
+    =/  clients=(list ^build)
+      (~(get-clients by-build-dag components.state) build)
+    ::
+    %+  lien  clients
+    |=  client=^build
+    ^-  ?
+    ::
+    ^$(build client)
   ::  +is-build-live: whether this is a live or a once build
   ::
   ++  is-build-live
@@ -5291,10 +5323,8 @@
             (~(has by listeners.state) build)
             ::  check if the build is cached
             ::
-            =/  result  (~(get by results.state) build)
-            ?.  ?=([~ %value *] result)
-              |
-            (~(has by cache.state) [last-accessed.u.result build])
+            ::    TODO: don't give up; just delete the dependency tracking
+            ::
         ==
       ::  ~&  :*  %cleanup-no-op
       ::          build=(build-to-tape build)
@@ -5305,12 +5335,14 @@
       ::      ==
       this
     ::  ~&  [%cleaning-up (build-to-tape build)]
+    ::
+    =/  is-build-cached=?  (is-build-under-cached-root build)
     ::  remove :build from :state, starting with its cache line
     ::
-    =.  results.state  (~(del by results.state) build)
+    =?  results.state  !is-build-cached  (~(del by results.state) build)
     ::  remove :build from the list of attempted builds
     ::
-    =.  builds.state  (~(del by-builds builds.state) build)
+    =?  builds.state  !is-build-cached  (~(del by-builds builds.state) build)
     ::  if no more builds at this date, remove the date from :resource-updates
     ::
     =?    resource-updates.state
@@ -5361,13 +5393,30 @@
         (~(put in dirty-discs) disc)
       ::
       this
-    ::  this also recurses on our children
+    ::  recurse on sub-builds
     ::
-    =.  ..execute  (unlink-sub-builds build)
+    =.  ..execute
+      ::  if we're not cached, then remove sub-build<-->client linkages
+      ::
+      ?.  is-build-cached
+        (unlink-sub-builds build)
+      ::  we're cached, so leave the linkages but recurse downward
+      ::
+      =/  sub-builds  (~(get-subs by-build-dag components.state) build)
+      ::
+      |-  ^+  ..execute
+      ?~  sub-builds  ..execute
+      ::
+      =.  ..execute  ^$(build i.sub-builds)
+      ::
+      $(sub-builds t.sub-builds)
     ::  if there is a newer rebuild of :build, delete the linkage
     ::
     =/  rebuild  (~(get by new.rebuilds.state) build)
-    =?  rebuilds.state  ?=(^ rebuild)
+    =?    rebuilds.state
+        ::
+        &(!is-build-cached ?=(^ rebuild))
+      ::
       %_  rebuilds.state
         new  (~(del by new.rebuilds.state) build)
         old  (~(del by old.rebuilds.state) u.rebuild)
