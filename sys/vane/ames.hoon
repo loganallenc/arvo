@@ -1,3 +1,4 @@
+!:
 ::  ::  ames (4a), networking
 ::
   |=  pit=vase
@@ -522,6 +523,7 @@
           ::
               rov
             |-  ^-  (unit lane)
+            ?:  ?=(?(%earl %pawn) (clan:title her))  ~
             ?-  ryn
               [%if *]  ?.  ?=([~ %if *] lun.wod.dur)
                          `ryn
