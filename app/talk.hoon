@@ -78,6 +78,7 @@
           {$banish name (set ship)}                     :<  deny permission
           {$source name (map circle range)}             :<  add source
           {$unsource name (map circle range)}           :<  remove source
+          {$read name @ud}
           ::  personal metadata                         ::
           {$attend audience (unit presence)}            :<  set our presence
           {$name audience human}                        :<  set our name
@@ -1010,6 +1011,7 @@
           $banish  (permit | +.job)
           $source  (source & +.job)
           $unsource  (source | +.job)
+          $read  (read +.job)
           ::  personal metadata
           $attend  (attend +.job)
           $name    (set-name +.job)
@@ -1212,6 +1214,15 @@
         |=  {sub/? nom/name pos/(map circle range)}
         ^+  ..sh-work
         (sh-act %source nom sub pos)
+      ::
+      ++  read
+        :>    %read
+        :>
+        :>  adds {pas} to {nom}'s src.
+        ::
+        |=  {nom/name red/@ud}
+        ^+  ..sh-work
+        (sh-act %read nom red)
       ::
       :>  #
       :>  #  %personal-metadata
@@ -1856,6 +1867,9 @@
       ::
           $caption
         "cap: {(trip cap.dif)}"
+      ::
+          $read
+        "red: {(scow %ud red.dif)}"
       ::
           $filter
         ;:  weld

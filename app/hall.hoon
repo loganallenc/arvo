@@ -331,6 +331,7 @@
         $permit  (action-permit +.act)
         $delete  (action-delete +.act)
         $usage   (action-usage +.act)
+        $read    (action-read +.act)
         ::  messaging
         $convey  (action-convey +.act)
         $phrase  (action-phrase +.act)
@@ -399,6 +400,7 @@
             :-  typ
             ?.  ?=(?($village $journal) typ)  ~
             [our.bol ~ ~]
+            0
         ==
       (ta-evil (crip "{(trip nom)}: already exists"))
     ::
@@ -465,6 +467,15 @@
       ?~  soy
         (ta-evil (crip "no story {(trip nom)}"))
       so-done:(~(so-usage so nom ~ u.soy) add tas)
+    ::
+    ++  action-read
+      :>  set the read message number
+      ::
+      |=  {nom/name red/@ud}
+      =+  soy=(~(get by stories) nom)
+      ?~  soy
+        (ta-evil (crip "no story {(trip nom)}"))
+      so-done:(~(so-read so nom ~ u.soy) red)
     ::
     :>  #  %messaging
     +|
@@ -1089,6 +1100,7 @@
             [%config so-cir %filter fit.cof]
             [%config so-cir %secure sec.con.cof]
             [%config so-cir %permit & sis.con.cof]
+            [%config so-cir %read red.cof]
         ==
       |=  d/delta-story
       [%story nom d]
@@ -1141,6 +1153,13 @@
         ?:(add ~(dif in tas) ~(int in tas))
       ?~  sas  +>.$
       (so-delta-our %config so-cir %usage add sas)
+    ::
+    ++  so-read
+      :>  set the read message number in circle config
+      |=  {red/@ud}
+      ^+  +>
+      ?:  =(red red.shape)  +>
+      (so-delta-our %config so-cir %read red)
     ::
     ++  so-filter
       :>    change message rules

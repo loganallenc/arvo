@@ -233,6 +233,7 @@
       tag+(sa tag.a cord)
       fit+(filt fit.a)
       con+(cont con.a)
+      red+(numb red.a)
     ==
   ::
   ++  sorc                                              ::>  source
